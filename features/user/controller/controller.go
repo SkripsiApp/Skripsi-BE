@@ -117,5 +117,5 @@ func (uh *userController) Login(e echo.Context) error {
 
 	response := response.UserCoreToLoginResponse(data, token)
 
-	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
+	return e.JSON(200, helper.ResponseSuccessWithData("berhasil melakukan login", response))
 }
