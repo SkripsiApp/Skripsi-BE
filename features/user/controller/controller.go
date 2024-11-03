@@ -6,6 +6,7 @@ import (
 	"skripsi/features/user/interfaces"
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
+	"skripsi/utils/jwt"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -38,6 +39,15 @@ func (uh *userController) Register(e echo.Context) error {
 }
 
 func (uh *userController) GetAll(e echo.Context) error {
+	_, role, err := jwt.ExtractToken(e)
+	if role != constant.ADMIN {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+	}
+
+	if err != nil {
+		return helper.ResponseError(401, "invalid token")
+	}
+
 	search := e.QueryParam("search")
 	page, _ := strconv.Atoi(e.QueryParam("page"))
 	limit, _ := strconv.Atoi(e.QueryParam("limit"))
@@ -57,7 +67,10 @@ func (uh *userController) GetAll(e echo.Context) error {
 }
 
 func (uh *userController) GetById(e echo.Context) error {
-	id := e.Param("id")
+	id, _, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return helper.ResponseError(401, "invalid token")
+	}
 
 	data, err := uh.userService.GetById(id)
 	if err != nil {
@@ -70,7 +83,10 @@ func (uh *userController) GetById(e echo.Context) error {
 }
 
 func (uh *userController) UpdateById(e echo.Context) error {
-	id := e.Param("id")
+	id, _, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return helper.ResponseError(401, "invalid token")
+	}
 
 	input := request.UserUpdate{}
 	errBind := e.Bind(&input)
