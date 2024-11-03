@@ -19,13 +19,13 @@ func main() {
 	e.HTTPErrorHandler = md.ErrorMiddleware
 
 	cfg := config.InitConfig()
-	mysql := database.InitDBMysql(cfg)
-	migration.InitMigrationMysql(mysql)
+	db := database.InitDBPostgres(cfg)
+	migration.InitMigrationPostgre(db)
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
 
-	routes.InitRoutes(e, mysql)
+	routes.InitRoutes(e, db)
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
