@@ -133,26 +133,26 @@ func (u *userService) UpdateById(id string, data entity.UsersCore) error {
 		return helper.ResponseError(400, constant.ERROR_ID_INVALID)
 	}
 
-	if data.Name == "" || data.Username == "" || data.Email == "" {
-		return helper.ResponseError(400, constant.ERROR_EMPTY)
+	if data.Email != "" {
+		emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+		if !emailRegex.MatchString(data.Email) {
+			return helper.ResponseError(400, constant.ERROR_FORMAT_EMAIL)
+		}
+
+		_, err := u.userRepo.FindByEmail(data.Email)
+		if err == nil {
+			return helper.ResponseError(400, constant.ERROR_EMAIL_EXIST)
+		}
 	}
 
-	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-	if !emailRegex.MatchString(data.Email) {
-		return helper.ResponseError(400, constant.ERROR_FORMAT_EMAIL)
+	if data.Username != "" {
+		_, err := u.userRepo.FindByUsername(data.Username)
+		if err == nil {
+			return helper.ResponseError(400, constant.ERROR_USERNAME_EXIST)
+		}
 	}
 
-	_, err := u.userRepo.FindByEmail(data.Email)
-	if err == nil {
-		return helper.ResponseError(400, constant.ERROR_EMAIL_EXIST)
-	}
-
-	_, err = u.userRepo.FindByUsername(data.Username)
-	if err == nil {
-		return helper.ResponseError(400, constant.ERROR_USERNAME_EXIST)
-	}
-
-	err = u.userRepo.UpdateById(id, data)
+	err := u.userRepo.UpdateById(id, data)
 	if err != nil {
 		return err
 	}
