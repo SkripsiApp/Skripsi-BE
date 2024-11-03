@@ -18,7 +18,7 @@ func AddressCoreToAddressModel(data entity.AddressCore) model.Address {
 		Phone:      data.Phone,
 		CreatedAt:  data.CreatedAt,
 		UpdatedAt:  data.UpdatedAt,
-		DeleteAt:   data.DeleteAt,
+		DeletedAt:   data.DeletedAt,
 	}
 	return addressModel
 }
@@ -45,7 +45,7 @@ func AddressModelToAddressCore(data model.Address) entity.AddressCore {
 		Phone:      data.Phone,
 		CreatedAt:  data.CreatedAt,
 		UpdatedAt:  data.UpdatedAt,
-		DeleteAt:   data.DeleteAt,
+		DeletedAt:   data.DeletedAt,
 	}
 	return addressCore
 }

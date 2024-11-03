@@ -1,9 +1,13 @@
 package repository
 
 import (
+	"errors"
 	"skripsi/features/address/entity"
 	"skripsi/features/address/interfaces"
 	"skripsi/features/address/mapping"
+	"skripsi/features/address/model"
+	"skripsi/utils/constant"
+	"skripsi/utils/helper"
 	"skripsi/utils/pagination"
 
 	"gorm.io/gorm"
@@ -33,8 +37,18 @@ func (a *addressRepository) Create(data entity.AddressCore) (entity.AddressCore,
 }
 
 // DeleteById implements interfaces.AddressRepositoryInterface.
-func (a *addressRepository) DeleteById(id string) error {
-	panic("unimplemented")
+func (a *addressRepository) DeleteById(id string, userId string) error {
+	data := model.Address{}
+
+	tx := a.db.Where("id = ? AND user_id = ?", id, userId).Delete(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	return nil
 }
 
 // GetAll implements interfaces.AddressRepositoryInterface.
@@ -43,11 +57,35 @@ func (a *addressRepository) GetAll(search string, page int, limit int) ([]entity
 }
 
 // GetById implements interfaces.AddressRepositoryInterface.
-func (a *addressRepository) GetById(id string) (entity.AddressCore, error) {
-	panic("unimplemented")
+func (a *addressRepository) GetById(id string, userId string) (entity.AddressCore, error) {
+	data := model.Address{}
+
+	tx := a.db.Where("id = ? AND user_id = ?", id, userId).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.AddressCore{}, helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return entity.AddressCore{}, tx.Error
+	}
+
+	response := mapping.AddressModelToAddressCore(data)
+	return response, nil
 }
 
 // UpdateById implements interfaces.AddressRepositoryInterface.
 func (a *addressRepository) UpdateById(id string, data entity.AddressCore) error {
 	panic("unimplemented")
+}
+
+// FindById implements interfaces.AddressRepositoryInterface.
+func (a *addressRepository) FindById(id string) (entity.AddressCore, error) {
+	data := model.Address{}
+
+	tx := a.db.Where("id = ?", id).First(&data)
+	if tx.Error != nil {
+		return entity.AddressCore{}, tx.Error
+	}
+
+	response := mapping.AddressModelToAddressCore(data)
+	return response, nil
 }
