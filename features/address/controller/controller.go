@@ -75,3 +75,17 @@ func (a *addressController) GetById(e echo.Context) error {
 
 	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, data))
 }
+
+func (a *addressController) GetAll(e echo.Context) error {
+	idUser, _, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return errExtract
+	}
+
+	data, err := a.addressService.GetAll(idUser)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, data))
+}

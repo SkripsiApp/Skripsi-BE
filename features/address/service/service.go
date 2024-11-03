@@ -6,7 +6,6 @@ import (
 	"skripsi/features/address/interfaces"
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
-	"skripsi/utils/pagination"
 )
 
 type addressService struct {
@@ -72,8 +71,17 @@ func (a *addressService) DeleteById(id string, userId string) error {
 }
 
 // GetAll implements interfaces.AddressServiceInterface.
-func (a *addressService) GetAll(search string, page int, limit int) ([]entity.AddressCore, pagination.PageInfo, int, error) {
-	panic("unimplemented")
+func (a *addressService) GetAll(idUser string) ([]entity.AddressCore, error) {
+	if idUser == "" {
+		return nil, helper.ResponseError(400, constant.ERROR_DATA_ID)
+	}
+
+	data, err := a.addressRepository.GetAll(idUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 // GetById implements interfaces.AddressServiceInterface.

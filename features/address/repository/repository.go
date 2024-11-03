@@ -8,7 +8,6 @@ import (
 	"skripsi/features/address/model"
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
-	"skripsi/utils/pagination"
 
 	"gorm.io/gorm"
 )
@@ -52,8 +51,16 @@ func (a *addressRepository) DeleteById(id string, userId string) error {
 }
 
 // GetAll implements interfaces.AddressRepositoryInterface.
-func (a *addressRepository) GetAll(search string, page int, limit int) ([]entity.AddressCore, pagination.PageInfo, int, error) {
-	panic("unimplemented")
+func (a *addressRepository) GetAll(idUser string) ([]entity.AddressCore, error) {
+	data := []model.Address{}
+
+	tx := a.db.Where("user_id = ?", idUser).Find(&data)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	response := mapping.ListAddressModelToAddressCore(data)
+	return response, nil
 }
 
 // GetById implements interfaces.AddressRepositoryInterface.

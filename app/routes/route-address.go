@@ -17,6 +17,7 @@ func RouteAddress(e *echo.Group, db *gorm.DB) {
 
 	adress := e.Group("/address", jwt.JWTMiddleware())
 	adress.POST("", addressController.Create)
+	adress.GET("", addressController.GetAll)
 	adress.GET("/:id", addressController.GetById)
 	adress.DELETE("/:id", addressController.DeleteById)
 }
