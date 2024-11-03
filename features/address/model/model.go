@@ -17,5 +17,5 @@ type Address struct {
 	Phone      string `gorm:"not null"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-	DeleteAt   gorm.DeletedAt `gorm:"index"`
+	DeletedAt  gorm.DeletedAt `gorm:"index"`
 }
