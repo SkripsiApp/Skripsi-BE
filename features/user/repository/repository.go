@@ -72,7 +72,20 @@ func (ur *userRepository) GetAll(search string, page, limit int) ([]entity.Users
 
 // GetById implements interfaces.UserRepositoryInterface.
 func (ur *userRepository) GetById(id string) (entity.UsersCore, error) {
-	panic("unimplemented")
+	dataUser := model.Users{}
+
+	tx := ur.db.Where("id = ?", id).First(&dataUser)
+
+	if tx.RowsAffected == 0 {
+		return entity.UsersCore{}, errors.New(constant.ERROR_DATA_ID)
+	}
+
+	if tx.Error != nil {
+		return entity.UsersCore{}, tx.Error
+	}
+
+	dataResponse := mapping.UserModelToUserCore(dataUser)
+	return dataResponse, nil
 }
 
 // Register implements interfaces.UserRepositoryInterface.
@@ -90,7 +103,18 @@ func (ur *userRepository) Register(data entity.UsersCore) (entity.UsersCore, err
 
 // UpdateById implements interfaces.UserRepositoryInterface.
 func (ur *userRepository) UpdateById(id string, data entity.UsersCore) error {
-	panic("unimplemented")
+	request := mapping.UserCoreToUserModel(data)
+
+	tx := ur.db.Where("id = ?", id).Updates(&request)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	if tx.RowsAffected == 0 {
+		return errors.New(constant.ERROR_DATA_ID)
+	}
+
+	return nil
 }
 
 // FindByUsername implements interfaces.UserRepositoryInterface.

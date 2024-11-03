@@ -20,3 +20,13 @@ func ListUserCoreToUserResponse(data []entity.UsersCore) []UserResponse {
 	}
 	return list
 }
+
+func UserCoreToLoginResponse(data entity.UsersCore, token string) LoginResponse {
+	return LoginResponse{
+		Id:       data.Id,
+		Name:     data.Name,
+		Username: data.Username,
+		Email:    data.Email,
+		Token:    token,
+	}
+}

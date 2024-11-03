@@ -15,4 +15,6 @@ func RouteUser(e *echo.Group, db *gorm.DB) {
 	userController := controller.NewUserController(userService)
 
 	e.POST("/register", userController.Register)
+	e.GET("/users", userController.GetAll)
+	e.GET("/users/:id", userController.GetById)
 }

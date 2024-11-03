@@ -55,3 +55,51 @@ func (uh *userController) GetAll(e echo.Context) error {
 
 	return e.JSON(200, helper.ResponseSuccessWithPagnationAndCount(constant.SUCCESS_GET_DATA, response, pageInfo, totalCount))
 }
+
+func (uh *userController) GetById(e echo.Context) error {
+	id := e.Param("id")
+
+	data, err := uh.userService.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	response := response.UserCoreToUserResponse(data)
+
+	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
+}
+
+func (uh *userController) UpdateById(e echo.Context) error {
+	id := e.Param("id")
+
+	input := request.UserUpdate{}
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, "invalid input data")
+	}
+
+	data := request.UserUpdateToUserCore(input)
+	err := uh.userService.UpdateById(id, data)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccess(constant.SUCCESS_UPDATE_DATA))
+}
+
+func (uh *userController) Login(e echo.Context) error {
+	input := request.UserLogin{}
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, "invalid input data")
+	}
+
+	data, token, err := uh.userService.Login(input.Email, input.Password)
+	if err != nil {
+		return err
+	}
+
+	response := response.UserCoreToLoginResponse(data, token)
+
+	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
+}

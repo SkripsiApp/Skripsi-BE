@@ -16,7 +16,7 @@ type UserRepositoryInterface interface {
 
 type UserServiceInterrace interface {
 	Register(data entity.UsersCore) (entity.UsersCore, error)
-	Login(email, password string) (entity.UsersCore, error)
+	Login(email, password string) (entity.UsersCore, string, error)
 	GetById(id string) (entity.UsersCore, error)
 	GetAll(search string, page, limit int) ([]entity.UsersCore, pagination.PageInfo, int, error)
 	UpdateById(id string, data entity.UsersCore) error

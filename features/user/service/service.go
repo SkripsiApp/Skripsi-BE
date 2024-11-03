@@ -6,6 +6,7 @@ import (
 	"skripsi/features/user/interfaces"
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
+	"skripsi/utils/jwt"
 	"skripsi/utils/pagination"
 
 	"golang.org/x/text/cases"
@@ -42,12 +43,45 @@ func (ur *userService) GetAll(search string, page, limit int) ([]entity.UsersCor
 
 // GetById implements interfaces.UserServiceInterrace.
 func (ur *userService) GetById(id string) (entity.UsersCore, error) {
-	panic("unimplemented")
+	if id == "" {
+		return entity.UsersCore{}, helper.ResponseError(400, constant.ERROR_ID_INVALID)
+	}
+
+	data, err := ur.userRepo.GetById(id)
+	if err != nil {
+		return entity.UsersCore{}, helper.ResponseError(400, "data user tidak ditemukan")
+	}
+
+	return data, nil
 }
 
 // Login implements interfaces.UserServiceInterrace.
-func (ur *userService) Login(email string, password string) (entity.UsersCore, error) {
-	panic("unimplemented")
+func (ur *userService) Login(email string, password string) (entity.UsersCore, string, error) {
+	if email == "" || password == "" {
+		return entity.UsersCore{}, "", helper.ResponseError(400, constant.ERROR_EMPTY)
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(email) {
+		return entity.UsersCore{}, "", helper.ResponseError(400, constant.ERROR_FORMAT_EMAIL)
+	}
+
+	data, err := ur.userRepo.FindByEmail(email)
+	if err != nil {
+		return entity.UsersCore{}, "", helper.ResponseError(400, constant.ERROR_EMAIL_NOT_REGISTER)
+	}
+
+	comparePassword := helper.CompareHash(data.Password, password)
+	if !comparePassword {
+		return entity.UsersCore{}, "", helper.ResponseError(400, "email atau password salah")
+	}
+
+	token, err := jwt.CreateToken(data.Id, data.Role)
+	if err != nil {
+		return entity.UsersCore{}, "", helper.ResponseError(500, "gagal generate token")
+	}
+
+	return data, token, nil
 }
 
 // Register implements interfaces.UserServiceInterrace.
@@ -95,5 +129,33 @@ func (ur *userService) Register(data entity.UsersCore) (entity.UsersCore, error)
 
 // UpdateById implements interfaces.UserServiceInterrace.
 func (u *userService) UpdateById(id string, data entity.UsersCore) error {
-	panic("unimplemented")
+	if id == "" {
+		return helper.ResponseError(400, constant.ERROR_ID_INVALID)
+	}
+
+	if data.Name == "" || data.Username == "" || data.Email == "" {
+		return helper.ResponseError(400, constant.ERROR_EMPTY)
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(data.Email) {
+		return helper.ResponseError(400, constant.ERROR_FORMAT_EMAIL)
+	}
+
+	_, err := u.userRepo.FindByEmail(data.Email)
+	if err == nil {
+		return helper.ResponseError(400, constant.ERROR_EMAIL_EXIST)
+	}
+
+	_, err = u.userRepo.FindByUsername(data.Username)
+	if err == nil {
+		return helper.ResponseError(400, constant.ERROR_USERNAME_EXIST)
+	}
+
+	err = u.userRepo.UpdateById(id, data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
