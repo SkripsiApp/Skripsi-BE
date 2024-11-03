@@ -99,6 +99,38 @@ func (a *addressService) GetById(id string, userId string) (entity.AddressCore, 
 }
 
 // UpdateById implements interfaces.AddressServiceInterface.
-func (a *addressService) UpdateById(id string, data entity.AddressCore) error {
-	panic("unimplemented")
+func (a *addressService) UpdateById(id string, userId string, data entity.AddressCore) error {
+	if id == "" {
+		return helper.ResponseError(400, constant.ERROR_DATA_ID)
+	}
+
+	if data.Name == "" || data.Address == "" || data.City == "" || data.Subdistric == "" || data.ZipCode == "" || data.Phone == "" {
+		return helper.ResponseError(400, constant.ERROR_EMPTY)
+	}
+
+	phoneRegex := regexp.MustCompile(`^[0-9]+$`)
+	if len(data.Phone) < 10 || len(data.Phone) > 15 || !phoneRegex.MatchString(data.Phone) {
+		return helper.ResponseError(400, "format nomor telepon tidak valid")
+	}
+
+	zipCodeRegex := regexp.MustCompile(`^[0-9]+$`)
+	if len(data.ZipCode) != 5 || !zipCodeRegex.MatchString(data.ZipCode) {
+		return helper.ResponseError(400, "format kode pos tidak valid")
+	}
+
+	address, err := a.addressRepository.FindById(id)
+	if err != nil {
+		return helper.ResponseError(400, constant.ERROR_DATA_ID)
+	}
+
+	if address.UserId != userId {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+	}
+
+	errUpdate := a.addressRepository.UpdateById(id, userId, data)
+	if errUpdate != nil {
+		return errUpdate
+	}
+
+	return nil
 }

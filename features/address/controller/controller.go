@@ -2,6 +2,7 @@ package controller
 
 import (
 	"skripsi/features/address/dto/request"
+	"skripsi/features/address/dto/response"
 	"skripsi/features/address/interfaces"
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
@@ -73,7 +74,9 @@ func (a *addressController) GetById(e echo.Context) error {
 		return err
 	}
 
-	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, data))
+	response := response.AddressCoreToAddressResponse(data)
+
+	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
 }
 
 func (a *addressController) GetAll(e echo.Context) error {
@@ -87,5 +90,32 @@ func (a *addressController) GetAll(e echo.Context) error {
 		return err
 	}
 
-	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, data))
+	response := response.ListAddressCoreToAddressResponse(data)
+
+	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
+}
+
+func (a *addressController) UpdateById(e echo.Context) error {
+	idUser, _, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return errExtract
+	}
+
+	id := e.Param("id")
+
+	input := request.AddressRequest{}
+	input.UserId = idUser
+
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, constant.ERROR_INVALID_INPUT)
+	}
+
+	data := request.AddressRequestToAddressCore(input)
+	err := a.addressService.UpdateById(id, idUser, data)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccess(constant.SUCCESS_UPDATE_DATA))
 }

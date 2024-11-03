@@ -19,5 +19,6 @@ func RouteAddress(e *echo.Group, db *gorm.DB) {
 	adress.POST("", addressController.Create)
 	adress.GET("", addressController.GetAll)
 	adress.GET("/:id", addressController.GetById)
+	adress.PUT("/:id", addressController.UpdateById)
 	adress.DELETE("/:id", addressController.DeleteById)
 }

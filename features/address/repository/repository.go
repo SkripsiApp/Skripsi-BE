@@ -80,8 +80,18 @@ func (a *addressRepository) GetById(id string, userId string) (entity.AddressCor
 }
 
 // UpdateById implements interfaces.AddressRepositoryInterface.
-func (a *addressRepository) UpdateById(id string, data entity.AddressCore) error {
-	panic("unimplemented")
+func (a *addressRepository) UpdateById(id string, userId string, data entity.AddressCore) error {
+	request := mapping.AddressCoreToAddressModel(data)
+
+	tx := a.db.Where("id = ? AND user_id = ?", id, userId).Updates(&request)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	return nil
 }
 
 // FindById implements interfaces.AddressRepositoryInterface.
