@@ -16,6 +16,14 @@ type SuccessResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
+type SuccessResponseWithPaginationAndCount struct {
+	Status     bool        `json:"status"`
+	Message    string      `json:"message"`
+	Data       interface{} `json:"data,omitempty"`
+	Pagination interface{} `json:"pagination,omitempty"`
+	Count      int         `json:"count_data,omitempty"`
+}
+
 func (e *ErrorResponse) Error() string {
 	return e.Message
 }
@@ -46,5 +54,15 @@ func ResponseSuccessWithData(message string, data interface{}) SuccessResponse {
 		Status:  true,
 		Message: message,
 		Data:    data,
+	}
+}
+
+func ResponseSuccessWithPagnationAndCount(message string, data interface{}, pagnation interface{}, count int) SuccessResponseWithPaginationAndCount {
+	return SuccessResponseWithPaginationAndCount{
+		Status:     true,
+		Message:    message,
+		Data:       data,
+		Pagination: pagnation,
+		Count:      count,
 	}
 }

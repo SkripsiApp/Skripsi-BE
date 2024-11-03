@@ -7,6 +7,7 @@ import (
 	"skripsi/features/user/mapping"
 	"skripsi/features/user/model"
 	"skripsi/utils/constant"
+	"skripsi/utils/pagination"
 
 	"gorm.io/gorm"
 )
@@ -40,8 +41,33 @@ func (ur *userRepository) FindByEmail(email string) (entity.UsersCore, error) {
 }
 
 // GetAll implements interfaces.UserRepositoryInterface.
-func (ur *userRepository) GetAll() ([]entity.UsersCore, error) {
-	panic("unimplemented")
+func (ur *userRepository) GetAll(search string, page, limit int) ([]entity.UsersCore, pagination.PageInfo, int, error) {
+	dataUser := []model.Users{}
+
+	offset := (page - 1) * limit
+	query := ur.db.Model(&model.Users{})
+
+	if search != "" {
+		query = query.Where("name LIKE ? or email LIKE ? or username LIKE?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	var totalCount int64
+	tx := query.Count(&totalCount).Find(&dataUser)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	query = query.Offset(offset).Limit(limit)
+
+	tx = query.Find(&dataUser)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	dataResponse := mapping.ListUserModelToUserCore(dataUser)
+	pageInfo := pagination.CalculateData(int(totalCount), limit, page)
+
+	return dataResponse, pageInfo, int(totalCount), nil
 }
 
 // GetById implements interfaces.UserRepositoryInterface.
