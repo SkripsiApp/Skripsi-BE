@@ -13,7 +13,7 @@ type Users struct {
 	Email      string         `gorm:"unique;not null" json:"email"`
 	Password   string         `gorm:"not null" json:"password"`
 	Point      int            `gorm:"default:0" json:"point"`
-	Role       string         `json:"role"`
+	Role       string         `gorm:"default:user" json:"role"`
 	Otp        string         `json:"otp"`
 	OtpExpired string         `json:"otp_expired"`
 	CreatedAt  time.Time      `json:"created_at"`
