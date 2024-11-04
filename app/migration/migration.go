@@ -4,6 +4,7 @@ import (
 	address "skripsi/features/address/model"
 	admin "skripsi/features/admin/model"
 	user "skripsi/features/user/model"
+	voucher "skripsi/features/voucher/model"
 
 	"gorm.io/gorm"
 )
@@ -17,4 +18,5 @@ func InitMigrationPostgre(db *gorm.DB) {
 	db.AutoMigrate(&user.Users{})
 	db.AutoMigrate(&address.Address{})
 	db.AutoMigrate(&admin.Admin{})
+	db.AutoMigrate(&voucher.Voucher{})
 }
