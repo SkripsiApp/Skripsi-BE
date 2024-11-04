@@ -9,7 +9,7 @@ import (
 func AdminCoreToAdminModel(adminCore entity.AdminCore) model.Admin {
 	adminModel := model.Admin{
 		Id:       adminCore.Id,
-		Username: adminCore.Username,
+		Email:    adminCore.Email,
 		Password: adminCore.Password,
 		Role:     adminCore.Role,
 	}
@@ -29,7 +29,7 @@ func ListAdminCoreToAdminModel(adminCore []entity.AdminCore) []model.Admin {
 func AdminModelToAdminCore(adminModel model.Admin) entity.AdminCore {
 	adminCore := entity.AdminCore{
 		Id:       adminModel.Id,
-		Username: adminModel.Username,
+		Email:    adminModel.Email,
 		Password: adminModel.Password,
 		Role:     adminModel.Role,
 	}

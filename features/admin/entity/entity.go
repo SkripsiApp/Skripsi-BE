@@ -2,7 +2,7 @@ package entity
 
 type AdminCore struct {
 	Id       string
-	Username string
+	Email    string
 	Password string
 	Role     string
 }
