@@ -115,11 +115,11 @@ func (p *productRepository) FindByName(name string) (entity.ProductCore, error) 
 
 	tx := p.db.Where("name = ?", name).First(&data)
 	if tx.Error != nil {
-		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-			return entity.ProductCore{}, helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
-		}
-		return entity.ProductCore{}, tx.Error
-	}
+        if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+            return entity.ProductCore{}, nil
+        }
+        return entity.ProductCore{}, tx.Error
+    }
 
 	response := mapping.ProductModelToProductCore(data)
 	return response, nil

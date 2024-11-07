@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"mime/multipart"
 	"skripsi/features/product/entity"
 	"skripsi/features/product/interfaces"
@@ -23,6 +24,7 @@ func NewProductService(productRepository interfaces.ProductRepositoryInterface) 
 // Create implements interfaces.ProductServiceInterface.
 func (p *productService) Create(image *multipart.FileHeader, data entity.ProductCore) (entity.ProductCore, error) {
 	if data.Name == "" || data.Description == "" || data.Category == "" {
+		log.Println("data", data)
 		return entity.ProductCore{}, helper.ResponseError(400, constant.ERROR_EMPTY)
 	}
 
@@ -34,10 +36,14 @@ func (p *productService) Create(image *multipart.FileHeader, data entity.Product
 		return entity.ProductCore{}, helper.ResponseError(400, "produk tidak boleh negatif")
 	}
 
-	_, err := p.productRepository.FindByName(data.Name)
-	if err != nil {
-		return entity.ProductCore{}, helper.ResponseError(400, "nama produk sudah ada")
-	}
+	existingProduct, err := p.productRepository.FindByName(data.Name)
+    if err != nil {
+        return entity.ProductCore{}, err
+    }
+	
+    if existingProduct.Name != "" {
+        return entity.ProductCore{}, helper.ResponseError(400, "nama produk sudah ada")
+    }
 
 	for _, productSize := range data.ProductSize {
 		if productSize.Size == "" {
