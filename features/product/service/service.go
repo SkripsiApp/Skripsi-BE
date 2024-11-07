@@ -1,11 +1,13 @@
 package service
 
 import (
+	"mime/multipart"
 	"skripsi/features/product/entity"
 	"skripsi/features/product/interfaces"
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
 	"skripsi/utils/pagination"
+	"skripsi/utils/storage"
 )
 
 type productService struct {
@@ -19,7 +21,7 @@ func NewProductService(productRepository interfaces.ProductRepositoryInterface) 
 }
 
 // Create implements interfaces.ProductServiceInterface.
-func (p *productService) Create(data entity.ProductCore) (entity.ProductCore, error) {
+func (p *productService) Create(image *multipart.FileHeader, data entity.ProductCore) (entity.ProductCore, error) {
 	if data.Name == "" || data.Description == "" || data.Category == "" {
 		return entity.ProductCore{}, helper.ResponseError(400, constant.ERROR_EMPTY)
 	}
@@ -46,6 +48,18 @@ func (p *productService) Create(data entity.ProductCore) (entity.ProductCore, er
 			return entity.ProductCore{}, helper.ResponseError(400, "stock tidak boleh negatif")
 		}
 	}
+
+	src, err := image.Open()
+	if err != nil {
+		return entity.ProductCore{}, err
+	}
+	defer src.Close()
+
+	imageURL, err := storage.UploadToCloudinary(src, "products/"+data.Name)
+	if err != nil {
+		return entity.ProductCore{}, helper.ResponseError(500, "gagal upload gambar")
+	}
+	data.Image = imageURL
 
 	response, err := p.productRepository.Create(data)
 	if err != nil {

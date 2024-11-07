@@ -39,7 +39,12 @@ func (p *productController) Create(e echo.Context) error {
 
 	data := request.ProductRequestToProductCore(input)
 
-	_, err := p.productService.Create(data)
+	file, err := e.FormFile("image")
+	if err != nil {
+		return helper.ResponseError(400, "gambar tidak ditemukan")
+	}
+	
+	_, err = p.productService.Create(file, data)
 	if err != nil {
 		return err
 	}

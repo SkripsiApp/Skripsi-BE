@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"mime/multipart"
 	"skripsi/features/product/entity"
 	"skripsi/utils/pagination"
 )
@@ -15,7 +16,7 @@ type ProductRepositoryInterface interface {
 }
 
 type ProductServiceInterface interface {
-	Create(data entity.ProductCore) (entity.ProductCore, error)
+	Create(image *multipart.FileHeader, data entity.ProductCore) (entity.ProductCore, error)
 	GetAll(search string, page, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error)
 	GetById(id string) (entity.ProductCore, error)
 	UpdateById(id string, data entity.ProductCore) error

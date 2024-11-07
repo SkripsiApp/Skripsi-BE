@@ -1,15 +1,15 @@
 package request
 
 type ProductRequest struct {
-	Name        string               `json:"name"`
-	Description string               `json:"description"`
-	Price       int                  `json:"price"`
-	Category    string               `json:"category"`
-	Image       string               `json:"image"`
-	ProductSize []ProductSizeRequest `json:"product_size"`
+	Name        string               `json:"name" form:"name"`
+	Description string               `json:"description" form:"description"`
+	Price       int                  `json:"price" form:"price"`
+	Category    string               `json:"category" form:"category"`
+	Image       string               `json:"image" form:"image"`
+	ProductSize []ProductSizeRequest `json:"product_size" form:"product_size"`
 }
 
 type ProductSizeRequest struct {
-	Size  string `json:"size"`
-	Stock int    `json:"stock"`
+	Size  string `json:"size" form:"size"`
+	Stock int    `json:"stock" form:"stock"`
 }
