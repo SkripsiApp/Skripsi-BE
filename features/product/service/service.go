@@ -40,7 +40,7 @@ func (p *productService) Create(image *multipart.FileHeader, data entity.Product
     if err != nil {
         return entity.ProductCore{}, err
     }
-	
+
     if existingProduct.Name != "" {
         return entity.ProductCore{}, helper.ResponseError(400, "nama produk sudah ada")
     }
@@ -120,7 +120,7 @@ func (p *productService) GetById(id string) (entity.ProductCore, error) {
 }
 
 // UpdateById implements interfaces.ProductServiceInterface.
-func (p *productService) UpdateById(id string, data entity.ProductCore) error {
+func (p *productService) UpdateById(id string, image *multipart.FileHeader, data entity.ProductCore) error {
 	if id == "" {
 		return helper.ResponseError(400, constant.ERROR_DATA_ID)
 	}

@@ -2,43 +2,41 @@ package response
 
 import "skripsi/features/product/entity"
 
-func ProductResponseToProductCore(data ProductResponse) entity.ProductCore {
-	productCore := entity.ProductCore{
-		Id:          data.Id,
-		Name:        data.Name,
-		Description: data.Description,
-		Price:       data.Price,
-		Category:    data.Category,
-		Sold:        data.Sold,
-		Image:       data.Image,
-		ProductSize: ListProductSizeResponseToProductSizeCore(data.ProductSize),
+func ProductCoreToProductResponse(product entity.ProductCore) ProductResponse {
+	return ProductResponse{
+		Id:          product.Id,
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+		Category:    product.Category,
+		Sold:        product.Sold,
+		Image:       product.Image,
+		ProductSize: ListProductSizeCoreToProductSizeResponse(product.ProductSize),
 	}
-	return productCore
 }
 
-func ListProductResponseToProductCore(data []ProductResponse) []entity.ProductCore {
-	listProductCore := []entity.ProductCore{}
-	for _, productResponse := range data {
-		productCore := ProductResponseToProductCore(productResponse)
-		listProductCore = append(listProductCore, productCore)
+func ListProductCoreToListProductResponse(products []entity.ProductCore) []ProductResponse {
+	var listProductResponse []ProductResponse
+	for _, product := range products {
+		productResponse := ProductCoreToProductResponse(product)
+		listProductResponse = append(listProductResponse, productResponse)
 	}
-	return listProductCore
+	return listProductResponse
 }
 
-func ProductSizeResponseToProductSizeCore(data ProductSizeResponse) entity.ProductSizeCore {
-	productSizeCore := entity.ProductSizeCore{
-		Id:    data.Id,
-		Size:  data.Size,
-		Stock: data.Stock,
+func ProductSizeCoreToProductSizeResponse(productSize entity.ProductSizeCore) ProductSizeResponse {
+	return ProductSizeResponse{
+		Id:    productSize.Id,
+		Size:  productSize.Size,
+		Stock: productSize.Stock,
 	}
-	return productSizeCore
 }
 
-func ListProductSizeResponseToProductSizeCore(data []ProductSizeResponse) []entity.ProductSizeCore {
-	listProductSizeCore := []entity.ProductSizeCore{}
-	for _, productSizeResponse := range data {
-		productSizeCore := ProductSizeResponseToProductSizeCore(productSizeResponse)
-		listProductSizeCore = append(listProductSizeCore, productSizeCore)
+func ListProductSizeCoreToProductSizeResponse(productSizes []entity.ProductSizeCore) []ProductSizeResponse {
+	var listProductSizeResponse []ProductSizeResponse
+	for _, productSize := range productSizes {
+		productSizeResponse := ProductSizeCoreToProductSizeResponse(productSize)
+		listProductSizeResponse = append(listProductSizeResponse, productSizeResponse)
 	}
-	return listProductSizeCore
+	return listProductSizeResponse
 }

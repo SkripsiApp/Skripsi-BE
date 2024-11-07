@@ -15,6 +15,10 @@ func RouteProduct(e *echo.Group, db *gorm.DB) {
 	productService := service.NewProductService(productRepository)
 	productController := controller.NewProductController(productService)
 
-	product := e.Group("/product", jwt.JWTMiddleware())
-	product.POST("", productController.Create)
+	product := e.Group("/products")
+	product.POST("", productController.Create, jwt.JWTMiddleware())
+	product.GET("", productController.GetAll)
+	product.GET("/:id", productController.GetById)
+	product.PUT("/:id", productController.UpdateById, jwt.JWTMiddleware())
+	product.DELETE("/:id", productController.DeleteById, jwt.JWTMiddleware())
 }
