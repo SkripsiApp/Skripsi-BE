@@ -8,7 +8,7 @@ import (
 
 type Product struct {
 	Id          string        `gorm:"primaryKey;type:varchar(191);not null"`
-	Name        string        `gorm:"not null"`
+	Name        string        `gorm:"not null;unique"`
 	Description string        `gorm:"type:text"`
 	Price       int           `gorm:"not null"`
 	Category    string        `gorm:"not null"`

@@ -32,6 +32,11 @@ func (p *productService) Create(data entity.ProductCore) (entity.ProductCore, er
 		return entity.ProductCore{}, helper.ResponseError(400, "produk tidak boleh negatif")
 	}
 
+	_, err := p.productRepository.FindByName(data.Name)
+	if err != nil {
+		return entity.ProductCore{}, helper.ResponseError(400, "nama produk sudah ada")
+	}
+
 	for _, productSize := range data.ProductSize {
 		if productSize.Size == "" {
 			return entity.ProductCore{}, helper.ResponseError(400, "size tidak boleh kosong")
