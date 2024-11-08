@@ -40,7 +40,7 @@ func (p *productRepository) Create(data entity.ProductCore) (entity.ProductCore,
 func (p *productRepository) DeleteById(id string) error {
 	data := model.Product{}
 
-	tx := p.db.Where("id = ?", id).Delete(&data)
+	tx := p.db.Unscoped().Where("id = ?", id).Delete(&data)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)

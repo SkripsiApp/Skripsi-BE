@@ -14,7 +14,7 @@ type Product struct {
 	Category    string        `gorm:"not null"`
 	Sold        int           `gorm:"default:0"`
 	Image       string        `gorm:"not null"`
-	ProductSize []ProductSize `gorm:"foreignKey:ProductId;references:Id"`
+	ProductSize []ProductSize `gorm:"foreignKey:ProductId;references:Id;constraint:OnDelete:CASCADE"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
