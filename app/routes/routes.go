@@ -12,4 +12,5 @@ func InitRoutes(e *echo.Echo, db *gorm.DB) {
 	RouteAddress(base, db)
 	RouteAdmin(base, db)
 	RouteVoucher(base, db)
+	RouteProduct(base, db)
 }

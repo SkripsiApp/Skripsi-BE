@@ -1,0 +1,156 @@
+package repository
+
+import (
+	"errors"
+	"skripsi/features/product/entity"
+	"skripsi/features/product/interfaces"
+	"skripsi/features/product/mapping"
+	"skripsi/features/product/model"
+	"skripsi/utils/constant"
+	"skripsi/utils/helper"
+	"skripsi/utils/pagination"
+
+	"gorm.io/gorm"
+)
+
+type productRepository struct {
+	db *gorm.DB
+}
+
+func NewProductRepository(db *gorm.DB) interfaces.ProductRepositoryInterface {
+	return &productRepository{
+		db: db,
+	}
+}
+
+// Create implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) Create(data entity.ProductCore) (entity.ProductCore, error) {
+	request := mapping.ProductCoreToProductModel(data)
+
+	tx := p.db.Create(&request)
+	if tx.Error != nil {
+		return entity.ProductCore{}, tx.Error
+	}
+
+	response := mapping.ProductModelToProductCore(request)
+	return response, nil
+}
+
+// DeleteById implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) DeleteById(id string) error {
+	data := model.Product{}
+
+	tx := p.db.Unscoped().Where("id = ?", id).Delete(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	return nil
+}
+
+// GetAll implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) GetAll(search string, page int, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error) {
+	data := []model.Product{}
+
+	offset := (page - 1) * limit
+	query := p.db.Model(&model.Product{}).Preload("ProductSize")
+
+	if search != "" {
+		query = query.Where("name LIKE ? or category LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	var totalCount int64
+	tx := query.Count(&totalCount).Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	query = query.Offset(offset).Limit(limit)
+
+	tx = query.Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	response := mapping.ListProductModelToProductCore(data)
+
+	pageInfo := pagination.CalculateData(int(totalCount), limit, page)
+	return response, pageInfo, int(totalCount), nil
+}
+
+// GetById implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) GetById(id string) (entity.ProductCore, error) {
+	data := model.Product{}
+
+	tx := p.db.Preload("ProductSize").Where("id = ?", id).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.ProductCore{}, helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return entity.ProductCore{}, tx.Error
+	}
+
+	response := mapping.ProductModelToProductCore(data)
+	return response, nil
+}
+
+// UpdateById implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) UpdateById(id string, data entity.ProductCore) error {
+	request := mapping.ProductCoreToProductModel(data)
+
+	tx := p.db.Model(&model.Product{}).Where("id = ?", id).Updates(&request)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}
+
+// UpdateProductSize implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) UpdateProductSize(id string, data []entity.ProductSizeCore) error {
+	reqProductSize := mapping.ListProductSizeCoreToProductSizeModel(data)
+
+    for _, size := range reqProductSize {
+        size.ProductId = id
+        var existingSize model.ProductSize
+        tx := p.db.Where("product_id = ? AND size = ?", id, size.Size).First(&existingSize)
+        if tx.Error != nil {
+            if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+                // Insert new product size if not found
+                tx = p.db.Create(&size)
+                if tx.Error != nil {
+                    return tx.Error
+                }
+            } else {
+                return tx.Error
+            }
+        } else {
+            // Update existing product size
+            tx = p.db.Model(&existingSize).Updates(&size)
+            if tx.Error != nil {
+                return tx.Error
+            }
+        }
+    }
+
+    return nil
+}
+
+// FindByName implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) FindByName(name string) (entity.ProductCore, error) {
+	data := model.Product{}
+
+	tx := p.db.Where("name = ?", name).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.ProductCore{}, nil
+		}
+		return entity.ProductCore{}, tx.Error
+	}
+
+	response := mapping.ProductModelToProductCore(data)
+	return response, nil
+}
