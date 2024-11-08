@@ -56,7 +56,7 @@ func (p *productRepository) GetAll(search string, page int, limit int) ([]entity
 	data := []model.Product{}
 
 	offset := (page - 1) * limit
-	query := p.db.Model(&model.Product{})
+	query := p.db.Model(&model.Product{}).Preload("ProductSize")
 
 	if search != "" {
 		query = query.Where("name LIKE ? or category LIKE ?", "%"+search+"%", "%"+search+"%")
@@ -85,7 +85,7 @@ func (p *productRepository) GetAll(search string, page int, limit int) ([]entity
 func (p *productRepository) GetById(id string) (entity.ProductCore, error) {
 	data := model.Product{}
 
-	tx := p.db.Where("id = ?", id).First(&data)
+	tx := p.db.Preload("ProductSize").Where("id = ?", id).First(&data)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return entity.ProductCore{}, helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
