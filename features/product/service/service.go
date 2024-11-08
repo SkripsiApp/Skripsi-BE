@@ -37,13 +37,13 @@ func (p *productService) Create(image *multipart.FileHeader, data entity.Product
 	}
 
 	existingProduct, err := p.productRepository.FindByName(data.Name)
-    if err != nil {
-        return entity.ProductCore{}, err
-    }
+	if err != nil {
+		return entity.ProductCore{}, err
+	}
 
-    if existingProduct.Name != "" {
-        return entity.ProductCore{}, helper.ResponseError(400, "nama produk sudah ada")
-    }
+	if existingProduct.Name != "" {
+		return entity.ProductCore{}, helper.ResponseError(400, "nama produk sudah ada")
+	}
 
 	for _, productSize := range data.ProductSize {
 		if productSize.Size == "" {
@@ -125,31 +125,68 @@ func (p *productService) UpdateById(id string, image *multipart.FileHeader, data
 		return helper.ResponseError(400, constant.ERROR_DATA_ID)
 	}
 
-	if data.Name == "" || data.Description == "" || data.Category == "" {
-		return helper.ResponseError(400, constant.ERROR_EMPTY)
+	// Ambil data produk yang sudah ada
+	existingProduct, err := p.productRepository.GetById(id)
+	if err != nil {
+		return helper.ResponseError(404, "produk tidak ditemukan")
 	}
 
-	if len(data.Name) < 3 {
-		return helper.ResponseError(400, "nama produk minimal 3 karakter")
-	}
-
-	if data.Price < 0 {
-		return helper.ResponseError(400, "produk tidak boleh negatif")
-	}
-
-	for _, productSize := range data.ProductSize {
-		if productSize.Size == "" {
-			return helper.ResponseError(400, "size tidak boleh kosong")
+	// Update data produk jika ada input yang baru
+	if data.Name != "" && data.Name != existingProduct.Name {
+		if len(data.Name) < 3 {
+			return helper.ResponseError(400, "nama produk minimal 3 karakter")
 		}
-
-		if productSize.Stock < 0 {
-			return helper.ResponseError(400, "stock tidak boleh negatif")
-		}
+		existingProduct.Name = data.Name
 	}
 
-	err := p.productRepository.UpdateById(id, data)
+	if data.Description != "" && data.Description != existingProduct.Description {
+		if data.Description == "" {
+			return helper.ResponseError(400, "deskripsi produk tidak boleh kosong")
+		}
+		existingProduct.Description = data.Description
+	}
+
+	if data.Category != "" && data.Category != existingProduct.Category {
+		if data.Category == "" {
+			return helper.ResponseError(400, "kategori produk tidak boleh kosong")
+		}
+		existingProduct.Category = data.Category
+	}
+
+	if data.Price >= 0 && data.Price != existingProduct.Price {
+		existingProduct.Price = data.Price
+	}
+
+	// Jika gambar baru ada, upload gambar dan update URL gambar
+	if image != nil {
+		src, err := image.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		imagePath := "products/" + existingProduct.Name
+		imageURL, err := storage.UploadToCloudinary(src, imagePath)
+		if err != nil {
+			return helper.ResponseError(500, "gagal upload gambar")
+		}
+		
+		log.Println("imageURL", imageURL)
+		existingProduct.Image = imageURL
+	}
+
+	// Update produk di repository
+	err = p.productRepository.UpdateById(id, existingProduct)
 	if err != nil {
 		return err
+	}
+
+	// Update ukuran produk (ProductSize) jika ada
+	if len(data.ProductSize) > 0 {
+		err = p.productRepository.UpdateProductSize(id, data.ProductSize)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

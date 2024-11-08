@@ -3,8 +3,9 @@ package controller
 import (
 	"fmt"
 	"log"
-	"skripsi/features/product/dto/response"
+	"net/http"
 	"skripsi/features/product/dto/request"
+	"skripsi/features/product/dto/response"
 	"skripsi/features/product/interfaces"
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
@@ -114,60 +115,54 @@ func (p *productController) GetById(e echo.Context) error {
 
 func (p *productController) UpdateById(e echo.Context) error {
 	_, role, errExtract := jwt.ExtractToken(e)
-	if role != "admin" {
-		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
-	}
+    if role != "admin" {
+        return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+    }
 
-	if errExtract != nil {
-		return errExtract
-	}
+    if errExtract != nil {
+        return errExtract
+    }
 
-	id := e.Param("id")
+    id := e.Param("id")
 
-	input := request.ProductRequest{}
+    input := request.ProductRequest{}
 
-	errBind := e.Bind(&input)
-	if errBind != nil {
-		return helper.ResponseError(400, "invalid input data")
-	}
+    errBind := e.Bind(&input)
+    if errBind != nil {
+        return helper.ResponseError(400, "invalid input data")
+    }
 
-	// Log the input to check if product_size is bound correctly
-	log.Printf("ProductRequest before binding product_size: %+v", input)
+    // Manually bind product_size
+    productSizes := []request.ProductSizeRequest{}
+    for i := 0; ; i++ {
+        size := e.FormValue(fmt.Sprintf("product_size[%d].size", i))
+        if size == "" {
+            break
+        }
+        stock, err := strconv.Atoi(e.FormValue(fmt.Sprintf("product_size[%d].stock", i)))
+        if err != nil {
+            return helper.ResponseError(400, "invalid nilai stock")
+        }
+        productSizes = append(productSizes, request.ProductSizeRequest{
+            Size:  size,
+            Stock: stock,
+        })
+    }
+    input.ProductSize = productSizes
 
-	// Manually bind product_size
-	productSizes := []request.ProductSizeRequest{}
-	for i := 0; ; i++ {
-		size := e.FormValue(fmt.Sprintf("product_size[%d].size", i))
-		if size == "" {
-			break
-		}
-		stock, err := strconv.Atoi(e.FormValue(fmt.Sprintf("product_size[%d].stock", i)))
-		if err != nil {
-			return helper.ResponseError(400, "invalid nilai stock")
-		}
-		productSizes = append(productSizes, request.ProductSizeRequest{
-			Size:  size,
-			Stock: stock,
-		})
-	}
-	input.ProductSize = productSizes
+    data := request.ProductRequestToProductCore(input)
 
-	// Log the input to check if product_size is bound correctly
-	log.Printf("ProductRequest after binding product_size: %+v", input)
+    file, err := e.FormFile("image")
+    if err != nil && err != http.ErrMissingFile {
+        return helper.ResponseError(400, "gambar tidak ditemukan")
+    }
 
-	data := request.ProductRequestToProductCore(input)
+    err = p.productService.UpdateById(id, file, data)
+    if err != nil {
+        return err
+    }
 
-	file, err := e.FormFile("image")
-	if err != nil {
-		return helper.ResponseError(400, "gambar tidak ditemukan")
-	}
-
-	err = p.productService.UpdateById(id, file, data)
-	if err != nil {
-		return err
-	}
-
-	return e.JSON(200, helper.ResponseSuccess(constant.SUCCESS_UPDATE_DATA))
+    return e.JSON(200, helper.ResponseSuccess(constant.SUCCESS_UPDATE_DATA))
 }
 
 func (p *productController) DeleteById(e echo.Context) error {

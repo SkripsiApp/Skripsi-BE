@@ -13,6 +13,7 @@ type ProductRepositoryInterface interface {
 	UpdateById(id string, data entity.ProductCore) error
 	DeleteById(id string) error
 	FindByName(name string) (entity.ProductCore, error)
+	UpdateProductSize(id string, data []entity.ProductSizeCore) error
 }
 
 type ProductServiceInterface interface {

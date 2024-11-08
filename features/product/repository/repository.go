@@ -101,12 +101,42 @@ func (p *productRepository) GetById(id string) (entity.ProductCore, error) {
 func (p *productRepository) UpdateById(id string, data entity.ProductCore) error {
 	request := mapping.ProductCoreToProductModel(data)
 
-	tx := p.db.Where("id = ?", id).Updates(&request)
+	tx := p.db.Model(&model.Product{}).Where("id = ?", id).Updates(&request)
 	if tx.Error != nil {
 		return tx.Error
 	}
 
 	return nil
+}
+
+// UpdateProductSize implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) UpdateProductSize(id string, data []entity.ProductSizeCore) error {
+	reqProductSize := mapping.ListProductSizeCoreToProductSizeModel(data)
+
+    for _, size := range reqProductSize {
+        size.ProductId = id
+        var existingSize model.ProductSize
+        tx := p.db.Where("product_id = ? AND size = ?", id, size.Size).First(&existingSize)
+        if tx.Error != nil {
+            if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+                // Insert new product size if not found
+                tx = p.db.Create(&size)
+                if tx.Error != nil {
+                    return tx.Error
+                }
+            } else {
+                return tx.Error
+            }
+        } else {
+            // Update existing product size
+            tx = p.db.Model(&existingSize).Updates(&size)
+            if tx.Error != nil {
+                return tx.Error
+            }
+        }
+    }
+
+    return nil
 }
 
 // FindByName implements interfaces.ProductRepositoryInterface.
@@ -115,11 +145,11 @@ func (p *productRepository) FindByName(name string) (entity.ProductCore, error) 
 
 	tx := p.db.Where("name = ?", name).First(&data)
 	if tx.Error != nil {
-        if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-            return entity.ProductCore{}, nil
-        }
-        return entity.ProductCore{}, tx.Error
-    }
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.ProductCore{}, nil
+		}
+		return entity.ProductCore{}, tx.Error
+	}
 
 	response := mapping.ProductModelToProductCore(data)
 	return response, nil
