@@ -17,6 +17,9 @@ env:
   DBPORT: ${{ secrets.DBPORT }}
   SERVERPORT: ${{ secrets.SERVERPORT }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  API_SECRET: ${{ secrets.API_SECRET }}
+  API_NAME: ${{ secrets.API_NAME }}
+  API_KEY: ${{ secrets.API_KEY }}
 
 jobs:
   deploy:
@@ -64,6 +67,9 @@ jobs:
             DBPORT=${{ env.DBPORT }}
             SERVERPORT=${{ env.SERVERPORT }}
             JWT_SECRET=${{ env.JWT_SECRET }}
+            API_SECRET=${{ env.API_SECRET }}
+            API_NAME=${{ env.API_NAME }}
+            API_KEY=${{ env.API_KEY }}
   
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
