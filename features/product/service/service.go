@@ -55,6 +55,12 @@ func (p *productService) Create(image *multipart.FileHeader, data entity.Product
 		}
 	}
 
+	// Validasi ukuran gambar
+	maxImageSize := int64(10 * 1024 * 1024)
+	if image.Size > maxImageSize {
+		return entity.ProductCore{}, helper.ResponseError(400, "ukuran gambar tidak boleh lebih dari 10 MB")
+	}
+
 	src, err := image.Open()
 	if err != nil {
 		return entity.ProductCore{}, err
@@ -65,6 +71,7 @@ func (p *productService) Create(image *multipart.FileHeader, data entity.Product
 	if err != nil {
 		return entity.ProductCore{}, helper.ResponseError(500, "gagal upload gambar")
 	}
+	
 	data.Image = imageURL
 
 	response, err := p.productRepository.Create(data)
@@ -159,6 +166,11 @@ func (p *productService) UpdateById(id string, image *multipart.FileHeader, data
 
 	// Jika gambar baru ada, upload gambar dan update URL gambar
 	if image != nil {
+		maxImageSize := int64(10 * 1024 * 1024)
+		if image.Size > maxImageSize {
+			return helper.ResponseError(400, "ukuran gambar tidak boleh lebih dari 10 MB")
+		}
+
 		src, err := image.Open()
 		if err != nil {
 			return err
