@@ -6,6 +6,7 @@ import (
 	product "skripsi/features/product/model"
 	user "skripsi/features/user/model"
 	voucher "skripsi/features/voucher/model"
+	transaction "skripsi/features/transaction/model"
 
 	"gorm.io/gorm"
 )
@@ -21,4 +22,5 @@ func InitMigrationPostgre(db *gorm.DB) {
 	db.AutoMigrate(&admin.Admin{})
 	db.AutoMigrate(&voucher.Voucher{})
 	db.AutoMigrate(&product.Product{}, &product.ProductSize{})
+	db.AutoMigrate(&transaction.Transaction{}, &transaction.TransactionDetail{})
 }
