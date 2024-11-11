@@ -2,10 +2,12 @@ package controller
 
 import (
 	"skripsi/features/transaction/dto/request"
-	"skripsi/features/transaction/interfaces"
 	"skripsi/features/transaction/dto/response"
+	"skripsi/features/transaction/interfaces"
+	"skripsi/utils/constant"
 	"skripsi/utils/helper"
 	"skripsi/utils/jwt"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -58,4 +60,23 @@ func (t *transactionController) HandleMidtransNotification(e echo.Context) error
 	}
 
 	return e.JSON(200, helper.ResponseSuccess("notification berhasil dihandle"))
+}
+
+func (t *transactionController) GetAllTransaction(e echo.Context) error {
+	search := e.QueryParam("search")
+	page, _ := strconv.Atoi(e.QueryParam("page"))
+	limit, _ := strconv.Atoi(e.QueryParam("limit"))
+
+	data, pageInfo, totalCount, err := t.transactionService.GetAllTransaction(search, page, limit)
+	if err != nil {
+		return err
+	}
+
+	if len(data) == 0 {
+		return helper.ResponseError(200, "data belum tersedia")
+	}
+
+	response := response.ListTransactionCoreToTransactionResponse(data)
+
+	return e.JSON(200, helper.ResponseSuccessWithPagnationAndCount(constant.SUCCESS_GET_DATA, response, pageInfo, totalCount))
 }

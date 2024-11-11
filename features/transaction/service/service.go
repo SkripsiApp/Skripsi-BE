@@ -12,6 +12,7 @@ import (
 	user "skripsi/features/user/interfaces"
 	voucher "skripsi/features/voucher/interfaces"
 	"skripsi/utils/helper"
+	"skripsi/utils/pagination"
 
 	"github.com/joho/godotenv"
 	"github.com/midtrans/midtrans-go"
@@ -186,8 +187,19 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 }
 
 // GetAllTransaction implements interfaces.TransactionServiceInterface.
-func (t *transactionService) GetAllTransaction(search string, page int, limit int) ([]entity.TransactionCore, int, error) {
-	panic("unimplemented")
+func (t *transactionService) GetAllTransaction(search string, page int, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error) {
+	if limit > 10 {
+		return nil, pagination.PageInfo{}, 0, helper.ResponseError(400, "limit tidak boleh lebih dari 10")
+	}
+
+	page, limit = helper.ValidateCountLimitAndPage(page, limit)
+
+	dataTransaction, pageInfo, totalCount, err := t.transactionRepository.GetAllTransaction(search, page, limit)
+	if err != nil {
+		return nil, pagination.PageInfo{}, 0, err
+	}
+
+	return dataTransaction, pageInfo, totalCount, nil
 }
 
 // GetTransactionById implements interfaces.TransactionServiceInterface.
