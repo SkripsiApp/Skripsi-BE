@@ -214,3 +214,47 @@ func (p *productRepository) IncreaseStock(productSizeId string, quantity int) er
 
 	return nil
 }
+
+// IncreaseSold implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) IncreaseSold(productId string, quantity int) error {
+	data := model.Product{}
+
+	tx := p.db.Where("id = ?", productId).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	data.Sold += quantity
+
+	tx = p.db.Model(&model.Product{}).Where("id = ?", productId).UpdateColumn("sold", data.Sold)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}
+
+// DecreaseSold implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) DecreaseSold(productId string, quantity int) error {
+	data := model.Product{}
+
+	tx := p.db.Where("id = ?", productId).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	data.Sold -= quantity
+
+	tx = p.db.Model(&model.Product{}).Where("id = ?", productId).UpdateColumn("sold", data.Sold)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}

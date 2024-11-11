@@ -17,6 +17,8 @@ type ProductRepositoryInterface interface {
 	GetProductIdAndSize(productId string, size string) (entity.ProductSizeCore, error)
 	DecreaseStock(productSizeId string, quantity int) error
 	IncreaseStock(productSizeId string, quantity int) error
+	IncreaseSold(productId string, quantity int) error
+	DecreaseSold(productId string, quantity int) error
 }
 
 type ProductServiceInterface interface {

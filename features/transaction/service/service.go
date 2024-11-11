@@ -86,6 +86,11 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		if err := t.productRepository.DecreaseStock(productSize.Id, detail.Quantity); err != nil {
 			return entity.TransactionCore{}, err
 		}
+
+		if err := t.productRepository.IncreaseSold(detail.ProductId, detail.Quantity); err != nil {
+			return entity.TransactionCore{}, err
+		}
+
 		itemDetails = append(itemDetails, midtrans.ItemDetails{
 			ID:    detail.ProductId,
 			Price: int64(product.Price),
@@ -305,6 +310,12 @@ func (t *transactionService) processFailedPayment(transaction entity.Transaction
 			// Mengembalikan stock produk yang dibatalkan
 			if err := t.productRepository.IncreaseStock(productSize.Id, detail.Quantity); err != nil {
 				log.Printf("Error increasing stock - ProductSizeID: %v, Quantity: %d", productSize.Id, detail.Quantity)
+				return err
+			}
+
+			// Mengurangi jumlah produk yang terjual
+			if err := t.productRepository.DecreaseSold(detail.ProductId, detail.Quantity); err != nil {
+				log.Printf("Error decreasing sold - ProductID: %v, Quantity: %d", detail.ProductId, detail.Quantity)
 				return err
 			}
 		}
