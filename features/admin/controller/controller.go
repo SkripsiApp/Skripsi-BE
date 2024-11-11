@@ -33,7 +33,7 @@ func (a *adminController) Register(e echo.Context) error {
 		return err
 	}
 
-	return e.JSON(200, helper.ResponseSuccess(constant.SUCCESS_CREATE_DATA))
+	return e.JSON(201, helper.ResponseSuccess(constant.SUCCESS_CREATE_DATA))
 }
 
 func (a *adminController) Login(e echo.Context) error {
