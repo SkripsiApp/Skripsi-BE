@@ -95,7 +95,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 			ID:    detail.ProductId,
 			Price: int64(product.Price),
 			Qty:   int32(detail.Quantity),
-			Name:  product.Name,
+			Name:  fmt.Sprintf("%s - Size: %s", product.Name, detail.Size),
 		})
 
 		productTotalPrice := product.Price * detail.Quantity
