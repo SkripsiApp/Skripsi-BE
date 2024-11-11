@@ -5,6 +5,7 @@ import (
 	"skripsi/features/transaction/interfaces"
 	"skripsi/features/transaction/mapping"
 	"skripsi/features/transaction/model"
+	"skripsi/utils/pagination"
 
 	"gorm.io/gorm"
 )
@@ -33,8 +34,33 @@ func (t *transactionRepository) CreateTransaction(data entity.TransactionCore) (
 }
 
 // GetAllTransaction implements interfaces.TransactionRepositoryInterface.
-func (t *transactionRepository) GetAllTransaction(search string, page int, limit int) ([]entity.TransactionCore, int, error) {
-	panic("unimplemented")
+func (t *transactionRepository) GetAllTransaction(search string, page int, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error) {
+	data := []model.Transaction{}
+
+	offset := (page - 1) * limit
+	query := t.db.Model(&model.Transaction{}).Preload("TransactionDetail")
+
+	if search != "" {
+		query = query.Where("id LIKE ? or user_id LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	var totalCount int64
+	tx := query.Count(&totalCount).Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	query = query.Offset(offset).Limit(limit)
+
+	tx = query.Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	response := mapping.ListTransactionModelToListTransactionCore(data)
+
+	pageInfo := pagination.CalculateData(int(totalCount), limit, page)
+	return response, pageInfo, int(totalCount), nil
 }
 
 // GetTransactionById implements interfaces.TransactionRepositoryInterface.
@@ -61,3 +87,46 @@ func (t *transactionRepository) UpdateStatusTransactionById(id string, status st
 
 	return nil
 }
+
+// GetAllTransactionByUserId implements interfaces.TransactionRepositoryInterface.
+func (t *transactionRepository) GetAllTransactionByUserId(userId string, search string, page int, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error) {
+	data := []model.Transaction{}
+
+	offset := (page - 1) * limit
+	query := t.db.Model(&model.Transaction{}).Preload("TransactionDetail").Where("user_id = ?", userId)
+
+	if search != "" {
+		query = query.Where("id LIKE ? or user_id LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	var totalCount int64
+	tx := query.Count(&totalCount).Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	query = query.Offset(offset).Limit(limit)
+
+	tx = query.Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	response := mapping.ListTransactionModelToListTransactionCore(data)
+
+	pageInfo := pagination.CalculateData(int(totalCount), limit, page)
+	return response, pageInfo, int(totalCount), nil
+}
+
+// UpdateNoResiTransactionById implements interfaces.TransactionRepositoryInterface.
+func (t *transactionRepository) UpdateNoReceiptTransactionById(id, resi string) error {
+	data := model.Transaction{}
+
+	tx := t.db.Model(&data).Where("id = ?", id).Update("no_resi", resi)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}
+

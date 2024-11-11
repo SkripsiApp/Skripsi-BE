@@ -12,6 +12,7 @@ import (
 	user "skripsi/features/user/interfaces"
 	voucher "skripsi/features/voucher/interfaces"
 	"skripsi/utils/helper"
+	"skripsi/utils/pagination"
 
 	"github.com/joho/godotenv"
 	"github.com/midtrans/midtrans-go"
@@ -186,13 +187,33 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 }
 
 // GetAllTransaction implements interfaces.TransactionServiceInterface.
-func (t *transactionService) GetAllTransaction(search string, page int, limit int) ([]entity.TransactionCore, int, error) {
-	panic("unimplemented")
+func (t *transactionService) GetAllTransaction(search string, page int, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error) {
+	if limit > 10 {
+		return nil, pagination.PageInfo{}, 0, helper.ResponseError(400, "limit tidak boleh lebih dari 10")
+	}
+
+	page, limit = helper.ValidateCountLimitAndPage(page, limit)
+
+	dataTransaction, pageInfo, totalCount, err := t.transactionRepository.GetAllTransaction(search, page, limit)
+	if err != nil {
+		return nil, pagination.PageInfo{}, 0, err
+	}
+
+	return dataTransaction, pageInfo, totalCount, nil
 }
 
 // GetTransactionById implements interfaces.TransactionServiceInterface.
 func (t *transactionService) GetTransactionById(id string) (entity.TransactionCore, error) {
-	panic("unimplemented")
+	if id == "" {
+		return entity.TransactionCore{}, helper.ResponseError(400, "id transaksi tidak boleh kosong")
+	}
+
+	transaction, err := t.transactionRepository.GetTransactionById(id)
+	if err != nil {
+		return entity.TransactionCore{}, helper.ResponseError(404, "transaksi tidak ditemukan")
+	}
+
+	return transaction, nil
 }
 
 // UpdateStatusTransactionById implements interfaces.TransactionServiceInterface.
@@ -300,6 +321,55 @@ func (t *transactionService) processFailedPayment(transaction entity.Transaction
 		return t.userRepository.UpdateById(transaction.UserId, userCore.UsersCore{
 			Point: restoredPoints,
 		})
+	}
+
+	return nil
+}
+
+// GetAllTransactionByUserId implements interfaces.TransactionServiceInterface.
+func (t *transactionService) GetAllTransactionByUserId(userId string, search string, page int, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error) {
+	if userId == "" {
+		return nil, pagination.PageInfo{}, 0, helper.ResponseError(400, "user id tidak boleh kosong")
+	}
+
+	if limit > 10 {
+		return nil, pagination.PageInfo{}, 0, helper.ResponseError(400, "limit tidak boleh lebih dari 10")
+	}
+
+	page, limit = helper.ValidateCountLimitAndPage(page, limit)
+
+	dataTransaction, pageInfo, totalCount, err := t.transactionRepository.GetAllTransactionByUserId(userId, search, page, limit)
+	if err != nil {
+		return nil, pagination.PageInfo{}, 0, err
+	}
+
+	return dataTransaction, pageInfo, totalCount, nil
+}
+
+// UpdateNoResiTransactionById implements interfaces.TransactionServiceInterface.
+func (t *transactionService) UpdateNoReceiptTransactionById(id string, resi string) error {
+	if id == "" {
+		return helper.ResponseError(400, "id transaksi tidak boleh kosong")
+	}
+
+	if resi == "" {
+		return helper.ResponseError(400, "no resi tidak boleh kosong")
+	}
+
+	transaction, err := t.transactionRepository.GetTransactionById(id)
+	if err != nil {
+		return helper.ResponseError(404, "transaksi tidak ditemukan")
+	}
+
+	if transaction.Status != "Paid" {
+		return helper.ResponseError(400, "status transaksi harus Paid")
+	}
+
+	transaction.Status = "Shipped"
+
+	err = t.transactionRepository.UpdateNoReceiptTransactionById(id, resi)
+	if err != nil {
+		return err
 	}
 
 	return nil

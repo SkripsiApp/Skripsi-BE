@@ -16,3 +16,7 @@ type TransactionDetailRequest struct {
 	Size      string `json:"size"`
 	Quantity  int    `json:"quantity"`
 }
+
+type NoReceiptRequest struct {
+	NoReceipt string `json:"no_receipt"`
+}
