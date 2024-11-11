@@ -5,6 +5,7 @@ import "skripsi/features/transaction/entity"
 func TransactionCoreToTransactionResponse(data entity.TransactionCore) TransactionResponse {
 	return TransactionResponse{
 		Id:                data.Id,
+		UserId:            data.UserId,
 		VoucherId:         data.VoucherId,
 		AddressId:         data.AddressId,
 		OriginalPrice:     data.OriginalPrice,

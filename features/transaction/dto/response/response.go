@@ -4,6 +4,7 @@ import "time"
 
 type TransactionResponse struct {
 	Id                 string                      `json:"id"`
+	UserId             string                      `json:"user_id"`
 	VoucherId          *string                     `json:"voucher_id"`
 	AddressId          string                      `json:"address_id"`
 	OriginalPrice      int                         `json:"original_price"`
