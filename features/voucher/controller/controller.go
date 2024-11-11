@@ -46,7 +46,7 @@ func (v *voucherController) Create(e echo.Context) error {
 		return err
 	}
 
-	return e.JSON(200, helper.ResponseSuccess(constant.SUCCESS_CREATE_DATA))
+	return e.JSON(201, helper.ResponseSuccess(constant.SUCCESS_CREATE_DATA))
 }
 
 func (v *voucherController) DeleteById(e echo.Context) error {
@@ -58,7 +58,7 @@ func (v *voucherController) DeleteById(e echo.Context) error {
 	if role != constant.ADMIN {
 		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
 	}
-	
+
 	id := e.Param("id")
 	err := v.voucherService.DeleteById(id)
 	if err != nil {
