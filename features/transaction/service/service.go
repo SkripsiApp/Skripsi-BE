@@ -1,0 +1,289 @@
+package service
+
+import (
+	"fmt"
+	address "skripsi/features/address/interfaces"
+	product "skripsi/features/product/interfaces"
+	"skripsi/features/transaction/entity"
+	transaction "skripsi/features/transaction/interfaces"
+	userCore "skripsi/features/user/entity"
+	user "skripsi/features/user/interfaces"
+	voucher "skripsi/features/voucher/interfaces"
+	"skripsi/utils/helper"
+
+	"github.com/midtrans/midtrans-go"
+	"github.com/midtrans/midtrans-go/snap"
+)
+
+type transactionService struct {
+	transactionRepository transaction.TransactionRepositoryInterface
+	voucherRepository     voucher.VoucherRepositoryInterface
+	addressRepository     address.AddressRepositoryInterface
+	userRepository        user.UserRepositoryInterface
+	productRepository     product.ProductRepositoryInterface
+}
+
+func NewTransactionService(transactionRepository transaction.TransactionRepositoryInterface, userRepository user.UserRepositoryInterface, voucherRepository voucher.VoucherRepositoryInterface, addressRepository address.AddressRepositoryInterface, productRepository product.ProductRepositoryInterface) transaction.TransactionServiceInterface {
+	return &transactionService{
+		transactionRepository: transactionRepository,
+		voucherRepository:     voucherRepository,
+		addressRepository:     addressRepository,
+		userRepository:        userRepository,
+		productRepository:     productRepository,
+	}
+}
+
+// CreateTransaction implements interfaces.TransactionServiceInterface.
+func (t *transactionService) CreateTransaction(data entity.TransactionCore) (entity.TransactionCore, error) {
+	if data.UserId == "" {
+		return entity.TransactionCore{}, helper.ResponseError(400, "user id tidak boleh kosong")
+	}
+
+	var discountAmount int
+	if data.VoucherId != "" {
+		voucher, err := t.voucherRepository.GetById(data.VoucherId)
+		if err != nil {
+			return entity.TransactionCore{}, helper.ResponseError(400, "voucher tidak ditemukan")
+		}
+
+		discountAmount += voucher.Discount
+		fmt.Println("Voucher Discount:", data.DiscountAmount)
+	}
+
+	if data.AddressId == "" {
+		return entity.TransactionCore{}, helper.ResponseError(400, "alamat tidak boleh kosong")
+	}
+
+	address, err := t.addressRepository.GetById(data.AddressId, data.UserId)
+	if err != nil {
+		return entity.TransactionCore{}, helper.ResponseError(400, "alamat tidak ditemukan")
+	}
+
+	data.AddressId = address.Id
+
+	var totalPrice int
+	var itemDetails []midtrans.ItemDetails
+	for i, detail := range data.TransactionDetail {
+		product, err := t.productRepository.GetById(detail.ProductId)
+		if err != nil {
+			return entity.TransactionCore{}, helper.ResponseError(400, "produk tidak ditemukan")
+		}
+
+		productSize, err := t.productRepository.GetProductIdAndSize(detail.ProductId, detail.Size)
+		if err != nil {
+			return entity.TransactionCore{}, helper.ResponseError(400, "ukuran produk tidak ditemukan")
+		}
+
+		if productSize.Stock < detail.Quantity {
+			return entity.TransactionCore{}, helper.ResponseError(400, "stock produk tidak mencukupi")
+		}
+
+		if err := t.productRepository.DecreaseStock(productSize.Id, detail.Quantity); err != nil {
+			return entity.TransactionCore{}, err
+		}
+		itemDetails = append(itemDetails, midtrans.ItemDetails{
+			ID:    detail.ProductId,
+			Price: int64(product.Price),
+			Qty:   int32(detail.Quantity),
+			Name:  product.Name,
+		})
+
+		productTotalPrice := product.Price * detail.Quantity
+		totalPrice += productTotalPrice
+
+		data.TransactionDetail[i].TotalPrice = productTotalPrice
+	}
+
+	var updatedPoint int
+	user, err := t.userRepository.GetById(data.UserId)
+	if err != nil {
+		return entity.TransactionCore{}, helper.ResponseError(400, "user tidak ditemukan")
+	}
+
+	updatedPoint = user.Point
+
+	if data.UsePoint && data.PointUsed > 0 {
+		if user.Point < data.PointUsed {
+			return entity.TransactionCore{}, helper.ResponseError(400, "point tidak cukup")
+		}
+		discountAmount += data.PointUsed
+		updatedPoint -= data.PointUsed
+	}
+
+	if discountAmount > 0 {
+		itemDetails = append(itemDetails, midtrans.ItemDetails{
+			ID:    "DISCOUNT",
+			Price: int64(-discountAmount),
+			Qty:   1,
+			Name:  "Discount",
+		})
+	}
+
+	if data.ShippingCost > 0 {
+		itemDetails = append(itemDetails, midtrans.ItemDetails{
+			ID:    "SHIPPING",
+			Price: int64(data.ShippingCost),
+			Qty:   1,
+			Name:  "Shipping Cost",
+		})
+	}
+
+	totalPrice -= discountAmount
+	if totalPrice < 0 {
+		totalPrice = 0
+	}
+
+	totalPrice += data.ShippingCost
+
+	data.TotalPrice = totalPrice
+	data.DiscountAmount = discountAmount
+	data.TotalPoint = totalPrice / 100
+
+	updatedPoint += data.TotalPoint
+
+	data.Status = "Pending"
+	transaction, err := t.transactionRepository.CreateTransaction(data)
+	if err != nil {
+		return entity.TransactionCore{}, err
+	}
+
+	midtransClient := snap.Client{}
+	midtransClient.New("SB-Mid-server-YCb-jBlX8BE6NZWIsQvW7hTA", midtrans.Sandbox)
+
+	req := &snap.Request{
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  transaction.Id,
+			GrossAmt: int64(totalPrice),
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			Email: user.Email,
+		},
+		EnabledPayments: snap.AllSnapPaymentType,
+		CreditCard: &snap.CreditCardDetails{
+			Secure: true,
+		},
+		Items: &itemDetails,
+	}
+
+	snapResp, err := midtransClient.CreateTransaction(req)
+	if snapResp == nil || snapResp.RedirectURL == "" {
+		return entity.TransactionCore{}, helper.ResponseError(500, "gagal mendapatkan URL pembayaran dari Midtrans")
+	}
+
+	transaction.PaymentURL = snapResp.RedirectURL
+
+	// if err := t.userRepository.UpdateById(data.UserId, userCore.UsersCore{Point: updatedPoint}); err != nil {
+	// 	return entity.TransactionCore{}, err
+	// }
+
+	return transaction, nil
+}
+
+// GetAllTransaction implements interfaces.TransactionServiceInterface.
+func (t *transactionService) GetAllTransaction(search string, page int, limit int) ([]entity.TransactionCore, int, error) {
+	panic("unimplemented")
+}
+
+// GetTransactionById implements interfaces.TransactionServiceInterface.
+func (t *transactionService) GetTransactionById(id string) (entity.TransactionCore, error) {
+	panic("unimplemented")
+}
+
+// UpdateStatusTransactionById implements interfaces.TransactionServiceInterface.
+func (t *transactionService) UpdateStatusTransactionById(id string, status string) error {
+	panic("unimplemented")
+}
+
+// HandleMidtransNotification implements interfaces.TransactionServiceInterface.
+func (t *transactionService) HandleMidtransNotification(notification helper.MidtransNotificationPayload) error {
+	transaction, err := t.transactionRepository.GetTransactionById(notification.OrderID)
+	if err != nil {
+		return helper.ResponseError(404, "transaksi tidak ditemukan")
+	}
+
+	if transaction.Status != "Pending" {
+		return nil
+	}
+
+	// Handle different transaction statuses
+	switch notification.TransactionStatus {
+	case "capture":
+		if notification.FraudStatus == "challenge" {
+			transaction.Status = "Challenge"
+		} else if notification.FraudStatus == "accept" {
+			return t.processSuccessfulPayment(transaction)
+		}
+
+	case "settlement":
+		return t.processSuccessfulPayment(transaction)
+
+	case "cancel", "deny", "expire", "failure":
+		return t.processFailedPayment(transaction)
+	}
+
+	// Update transaction status if it was changed but not processed
+	if transaction.Status != "Pending" {
+		return t.transactionRepository.UpdateStatusTransactionById(transaction.Id, transaction.Status)
+	}
+
+	return nil
+}
+
+func (t *transactionService) processSuccessfulPayment(transaction entity.TransactionCore) error {
+	// Update transaction status
+	transaction.Status = "Paid"
+	if err := t.transactionRepository.UpdateStatusTransactionById(transaction.Id, transaction.Status); err != nil {
+		return err
+	}
+
+	// Get user data
+	user, err := t.userRepository.GetById(transaction.UserId)
+	if err != nil {
+		return helper.ResponseError(404, "user tidak ditemukan")
+	}
+
+	// Calculate and update user points
+	earnedPoints := transaction.TotalPoint
+	updatedPoints := user.Point + earnedPoints
+
+	// Update user points
+	return t.userRepository.UpdateById(transaction.UserId, userCore.UsersCore{
+		Point: updatedPoints,
+	})
+}
+
+// Helper method to process failed payments
+func (t *transactionService) processFailedPayment(transaction entity.TransactionCore) error {
+	// Update transaction status
+	transaction.Status = "Failed"
+	if err := t.transactionRepository.UpdateStatusTransactionById(transaction.Id, transaction.Status); err != nil {
+		return err
+	}
+
+	// Restore product stock
+	for _, detail := range transaction.TransactionDetail {
+		productSize, err := t.productRepository.GetProductIdAndSize(detail.ProductId, detail.Size)
+		if err != nil {
+			return helper.ResponseError(400, "ukuran produk tidak ditemukan")
+		}
+
+		if err := t.productRepository.IncreaseStock(productSize.Id, detail.Quantity); err != nil {
+			return err
+		}
+	}
+
+	// If points were used, restore them
+	if transaction.UsePoint && transaction.PointUsed > 0 {
+		user, err := t.userRepository.GetById(transaction.UserId)
+		if err != nil {
+			return helper.ResponseError(404, "user tidak ditemukan")
+		}
+
+		restoredPoints := user.Point + transaction.PointUsed
+		return t.userRepository.UpdateById(transaction.UserId, userCore.UsersCore{
+			Point: restoredPoints,
+		})
+	}
+
+	return nil
+}
