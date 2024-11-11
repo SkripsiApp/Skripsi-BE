@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"os"
 	address "skripsi/features/address/interfaces"
 	product "skripsi/features/product/interfaces"
@@ -141,7 +142,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	data.DiscountAmount = discountAmount
 	data.TotalPoint = totalPrice / 100
 
-	updatedPoint += data.TotalPoint
+	// updatedPoint += data.TotalPoint
 
 	data.Status = "Pending"
 	transaction, err := t.transactionRepository.CreateTransaction(data)
@@ -175,9 +176,9 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 
 	transaction.PaymentURL = snapResp.RedirectURL
 
-	// if err := t.userRepository.UpdateById(data.UserId, userCore.UsersCore{Point: updatedPoint}); err != nil {
-	// 	return entity.TransactionCore{}, err
-	// }
+	if err := t.userRepository.UpdateById(data.UserId, userCore.UsersCore{Point: updatedPoint}); err != nil {
+		return entity.TransactionCore{}, err
+	}
 
 	return transaction, nil
 }
@@ -267,10 +268,14 @@ func (t *transactionService) processFailedPayment(transaction entity.Transaction
 	for _, detail := range transaction.TransactionDetail {
 		productSize, err := t.productRepository.GetProductIdAndSize(detail.ProductId, detail.Size)
 		if err != nil {
+			log.Printf("Error getting product size - ProductID: %v, Size: %s", detail.ProductId, detail.Size)
 			return helper.ResponseError(400, "ukuran produk tidak ditemukan")
 		}
 
+		log.Printf("Found product size with ID: %v", productSize.Id)
+
 		if err := t.productRepository.IncreaseStock(productSize.Id, detail.Quantity); err != nil {
+			log.Printf("Error increasing stock - ProductSizeID: %v, Quantity: %d", productSize.Id, detail.Quantity)
 			return err
 		}
 	}
