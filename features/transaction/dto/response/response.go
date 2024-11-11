@@ -1,5 +1,7 @@
 package response
 
+import "time"
+
 type TransactionResponse struct {
 	Id                 string                      `json:"id"`
 	VoucherId          *string                     `json:"voucher_id"`
@@ -12,7 +14,11 @@ type TransactionResponse struct {
 	DiscountAmount     int                         `json:"discount_amount"`
 	CourierName        string                      `json:"courier_name"`
 	ShippingCost       int                         `json:"shipping_cost"`
+	NoReceipt          string                      `json:"no_receipt"`
+	Status             string                      `json:"status"`
 	PaymentURL         string                      `json:"payment_url"`
+	CreatedAt          time.Time                   `json:"created_at"`
+	UpdatedAt          time.Time                   `json:"updated_at"`
 	TransactionDetails []TransactionDetailResponse `json:"transaction_details"`
 }
 

@@ -15,7 +15,11 @@ func TransactionCoreToTransactionResponse(data entity.TransactionCore) Transacti
 		DiscountAmount:    data.DiscountAmount,
 		CourierName:       data.CourierName,
 		ShippingCost:      data.ShippingCost,
+		NoReceipt:         data.NoReceipt,
+		Status:            data.Status,
 		PaymentURL:        data.PaymentURL,
+		CreatedAt:         data.CreatedAt,
+		UpdatedAt:         data.UpdatedAt,
 		TransactionDetails: ListTransactionDetailCoreToTransactionDetailResponse(data.TransactionDetail),
 	}
 }
