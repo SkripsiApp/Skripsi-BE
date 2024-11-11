@@ -3,6 +3,7 @@ package controller
 import (
 	"skripsi/features/transaction/dto/request"
 	"skripsi/features/transaction/interfaces"
+	"skripsi/features/transaction/dto/response"
 	"skripsi/utils/helper"
 	"skripsi/utils/jwt"
 
@@ -40,7 +41,8 @@ func (t *transactionController) CreateTransaction(e echo.Context) error {
 		return err
 	}
 
-	return e.JSON(200, transaction)
+	response := response.TransactionCoreToTransactionResponse(transaction)
+	return e.JSON(200, helper.ResponseSuccessWithData("transaksi berhasil dibuat", response))
 }
 
 func (t *transactionController) HandleMidtransNotification(e echo.Context) error {
@@ -55,5 +57,5 @@ func (t *transactionController) HandleMidtransNotification(e echo.Context) error
 		return err
 	}
 
-	return e.JSON(200, helper.ResponseSuccess("notification processed successfully"))
+	return e.JSON(200, helper.ResponseSuccess("notification berhasil dihandle"))
 }
