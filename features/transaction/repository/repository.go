@@ -41,7 +41,7 @@ func (t *transactionRepository) GetAllTransaction(search string, page int, limit
 func (t *transactionRepository) GetTransactionById(id string) (entity.TransactionCore, error) {
 	data := model.Transaction{}
 
-	tx := t.db.Where("id = ?", id).First(&data)
+	tx := t.db.Preload("TransactionDetail").Where("id = ?", id).First(&data)
 	if tx.Error != nil {
 		return entity.TransactionCore{}, tx.Error
 	}
