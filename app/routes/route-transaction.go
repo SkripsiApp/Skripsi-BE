@@ -4,15 +4,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 
-	"skripsi/features/transaction/controller"
-	transaction "skripsi/features/transaction/repository"
-	user "skripsi/features/user/repository"
-	voucher "skripsi/features/voucher/repository"
 	address "skripsi/features/address/repository"
 	product "skripsi/features/product/repository"
+	"skripsi/features/transaction/controller"
+	transaction "skripsi/features/transaction/repository"
 	"skripsi/features/transaction/service"
-
-	
+	user "skripsi/features/user/repository"
+	voucher "skripsi/features/voucher/repository"
 
 	"skripsi/utils/jwt"
 )
@@ -28,5 +26,7 @@ func RouteTransaction(e *echo.Group, db *gorm.DB) {
 
 	transaction := e.Group("/transaction")
 	transaction.POST("", transactionController.CreateTransaction, jwt.JWTMiddleware())
+	transaction.GET("", transactionController.GetAllTransaction, jwt.JWTMiddleware())
+	transaction.GET("/:id", transactionController.GetTransactionById, jwt.JWTMiddleware())
 	transaction.POST("/midtrans/notification", transactionController.HandleMidtransNotification)
 }

@@ -204,7 +204,16 @@ func (t *transactionService) GetAllTransaction(search string, page int, limit in
 
 // GetTransactionById implements interfaces.TransactionServiceInterface.
 func (t *transactionService) GetTransactionById(id string) (entity.TransactionCore, error) {
-	panic("unimplemented")
+	if id == "" {
+		return entity.TransactionCore{}, helper.ResponseError(400, "id transaksi tidak boleh kosong")
+	}
+
+	transaction, err := t.transactionRepository.GetTransactionById(id)
+	if err != nil {
+		return entity.TransactionCore{}, helper.ResponseError(404, "transaksi tidak ditemukan")
+	}
+
+	return transaction, nil
 }
 
 // UpdateStatusTransactionById implements interfaces.TransactionServiceInterface.

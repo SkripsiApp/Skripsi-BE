@@ -63,6 +63,15 @@ func (t *transactionController) HandleMidtransNotification(e echo.Context) error
 }
 
 func (t *transactionController) GetAllTransaction(e echo.Context) error {
+	_, role, errExtract := jwt.ExtractToken(e)
+	if role != constant.ADMIN {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+	}
+
+	if errExtract != nil {
+		return errExtract
+	}
+
 	search := e.QueryParam("search")
 	page, _ := strconv.Atoi(e.QueryParam("page"))
 	limit, _ := strconv.Atoi(e.QueryParam("limit"))
@@ -79,4 +88,26 @@ func (t *transactionController) GetAllTransaction(e echo.Context) error {
 	response := response.ListTransactionCoreToTransactionResponse(data)
 
 	return e.JSON(200, helper.ResponseSuccessWithPagnationAndCount(constant.SUCCESS_GET_DATA, response, pageInfo, totalCount))
+}
+
+func (t *transactionController) GetTransactionById(e echo.Context) error {
+	_, role, errExtract := jwt.ExtractToken(e)
+	if role != constant.ADMIN {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+	}
+
+	if errExtract != nil {
+		return errExtract
+	}
+
+	id := e.Param("id")
+
+	data, err := t.transactionService.GetTransactionById(id)
+	if err != nil {
+		return err
+	}
+
+	response := response.TransactionCoreToTransactionResponse(data)
+
+	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
 }
