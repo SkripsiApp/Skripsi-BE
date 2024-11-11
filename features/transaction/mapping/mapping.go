@@ -56,6 +56,7 @@ func TransactionModelToTransactionCore(data model.Transaction) entity.Transactio
 		PaymentURL:     data.PaymentURL,
 		CreatedAt:      data.CreatedAt,
 		UpdatedAt:      data.UpdatedAt,
+		TransactionDetail: ListTransactionDetailModelToListTransactionDetailCore(data.TransactionDetail),
 	}
 	return transactionCore
 }
