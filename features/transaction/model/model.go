@@ -8,10 +8,11 @@ import (
 )
 
 type Transaction struct {
-	Id                string `gorm:"primaryKey;type:varchar(191);not null"`
-	UserId            string `gorm:"type:varchar(191);not null"`
-	VoucherId         string `gorm:"type:varchar(191);null"`
-	AddressId         string `gorm:"type:varchar(191);not null"`
+	Id                string  `gorm:"primaryKey;type:varchar(191);not null"`
+	UserId            string  `gorm:"type:varchar(191);not null"`
+	VoucherId         *string `gorm:"type:varchar(191);null"`
+	AddressId         string  `gorm:"type:varchar(191);not null"`
+	OriginalPrice     int
 	TotalPrice        int
 	TotalPoint        int
 	UsePoint          bool
@@ -20,7 +21,7 @@ type Transaction struct {
 	CourierName       string
 	ShippingCost      int
 	NoReceipt         string
-	Status            string 
+	Status            string
 	PaymentURL        string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time

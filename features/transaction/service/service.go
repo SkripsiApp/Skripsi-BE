@@ -43,8 +43,8 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	}
 
 	var discountAmount int
-	if data.VoucherId != "" {
-		voucher, err := t.voucherRepository.GetById(data.VoucherId)
+	if data.VoucherId != nil {
+		voucher, err := t.voucherRepository.GetById(*data.VoucherId)
 		if err != nil {
 			return entity.TransactionCore{}, helper.ResponseError(400, "voucher tidak ditemukan")
 		}
@@ -65,6 +65,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	data.AddressId = address.Id
 
 	var totalPrice int
+	var originalPrice int
 	var itemDetails []midtrans.ItemDetails
 	for i, detail := range data.TransactionDetail {
 		product, err := t.productRepository.GetById(detail.ProductId)
@@ -94,6 +95,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		productTotalPrice := product.Price * detail.Quantity
 		totalPrice += productTotalPrice
 
+		originalPrice += productTotalPrice
 		data.TransactionDetail[i].TotalPrice = productTotalPrice
 	}
 
@@ -137,7 +139,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	}
 
 	totalPrice += data.ShippingCost
-
+	data.OriginalPrice = originalPrice
 	data.TotalPrice = totalPrice
 	data.DiscountAmount = discountAmount
 	data.TotalPoint = totalPrice / 100

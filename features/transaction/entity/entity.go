@@ -5,15 +5,16 @@ import "time"
 type TransactionCore struct {
 	Id                string
 	UserId            string
-	VoucherId         string
+	VoucherId         *string
 	AddressId         string
+	OriginalPrice     int
 	TotalPrice        int
 	TotalPoint        int
 	UsePoint          bool
 	PointUsed         int
 	DiscountAmount    int
 	CourierName       string
-	ShippingCost	  int
+	ShippingCost      int
 	NoReceipt         string
 	Status            string
 	PaymentURL        string
