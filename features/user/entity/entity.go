@@ -19,5 +19,5 @@ type UsersCore struct {
 	OtpExpired      string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	DeleteAt        gorm.DeletedAt
+	DeletedAt       gorm.DeletedAt
 }

@@ -19,7 +19,7 @@ func UserCoreToUserModel(data entity.UsersCore) model.Users {
 		OtpExpired: data.OtpExpired,
 		CreatedAt:  data.CreatedAt,
 		UpdatedAt:  data.UpdatedAt,
-		DeleteAt:   data.DeleteAt,
+		DeletedAt:   data.DeletedAt,
 	}
 	return userModel
 }
@@ -48,7 +48,7 @@ func UserModelToUserCore(data model.Users) entity.UsersCore {
 		OtpExpired:      data.OtpExpired,
 		CreatedAt:       data.CreatedAt,
 		UpdatedAt:       data.UpdatedAt,
-		DeleteAt:        data.DeleteAt,
+		DeletedAt:        data.DeletedAt,
 	}
 	return userCore
 }
