@@ -14,6 +14,9 @@ type ProductRepositoryInterface interface {
 	DeleteById(id string) error
 	FindByName(name string) (entity.ProductCore, error)
 	UpdateProductSize(id string, data []entity.ProductSizeCore) error
+	GetProductIdAndSize(productId string, size string) (entity.ProductSizeCore, error)
+	DecreaseStock(productSizeId string, quantity int) error
+	IncreaseStock(productSizeId string, quantity int) error
 }
 
 type ProductServiceInterface interface {

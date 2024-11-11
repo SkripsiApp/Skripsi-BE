@@ -113,30 +113,30 @@ func (p *productRepository) UpdateById(id string, data entity.ProductCore) error
 func (p *productRepository) UpdateProductSize(id string, data []entity.ProductSizeCore) error {
 	reqProductSize := mapping.ListProductSizeCoreToProductSizeModel(data)
 
-    for _, size := range reqProductSize {
-        size.ProductId = id
-        var existingSize model.ProductSize
-        tx := p.db.Where("product_id = ? AND size = ?", id, size.Size).First(&existingSize)
-        if tx.Error != nil {
-            if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-                // Insert new product size if not found
-                tx = p.db.Create(&size)
-                if tx.Error != nil {
-                    return tx.Error
-                }
-            } else {
-                return tx.Error
-            }
-        } else {
-            // Update existing product size
-            tx = p.db.Model(&existingSize).Updates(&size)
-            if tx.Error != nil {
-                return tx.Error
-            }
-        }
-    }
+	for _, size := range reqProductSize {
+		size.ProductId = id
+		var existingSize model.ProductSize
+		tx := p.db.Where("product_id = ? AND size = ?", id, size.Size).First(&existingSize)
+		if tx.Error != nil {
+			if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+				// Insert new product size if not found
+				tx = p.db.Create(&size)
+				if tx.Error != nil {
+					return tx.Error
+				}
+			} else {
+				return tx.Error
+			}
+		} else {
+			// Update existing product size
+			tx = p.db.Model(&existingSize).Updates(&size)
+			if tx.Error != nil {
+				return tx.Error
+			}
+		}
+	}
 
-    return nil
+	return nil
 }
 
 // FindByName implements interfaces.ProductRepositoryInterface.
@@ -153,4 +153,64 @@ func (p *productRepository) FindByName(name string) (entity.ProductCore, error) 
 
 	response := mapping.ProductModelToProductCore(data)
 	return response, nil
+}
+
+// DecreaseStock implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) DecreaseStock(productSizeId string, quantity int) error {
+	data := model.ProductSize{}
+
+	tx := p.db.Where("id = ?", productSizeId).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	data.Stock -= quantity
+
+	tx = p.db.Model(&model.ProductSize{}).Where("id = ?", productSizeId).UpdateColumn("stock", data.Stock)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}
+
+// GetProductIdAndSize implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) GetProductIdAndSize(productId string, size string) (entity.ProductSizeCore, error) {
+	data := model.ProductSize{}
+
+	tx := p.db.Where("product_id = ? AND size = ?", productId, size).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.ProductSizeCore{}, helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return entity.ProductSizeCore{}, tx.Error
+	}
+
+	response := mapping.ProductSizeModelToProductSizeCore(data)
+	return response, nil
+}
+
+// IncreaseStock implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) IncreaseStock(productSizeId string, quantity int) error {
+	data := model.ProductSize{}
+
+	tx := p.db.Where("id = ?", productSizeId).First(&data)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	data.Stock += quantity
+
+	tx = p.db.Model(&model.ProductSize{}).Where("id = ?", productSizeId).UpdateColumn("stock", data.Stock)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
 }

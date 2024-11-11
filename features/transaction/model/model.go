@@ -10,7 +10,7 @@ import (
 type Transaction struct {
 	Id                string `gorm:"primaryKey;type:varchar(191);not null"`
 	UserId            string `gorm:"type:varchar(191);not null"`
-	VoucherId         string `gorm:"type:varchar(191);not null"`
+	VoucherId         string `gorm:"type:varchar(191);null"`
 	AddressId         string `gorm:"type:varchar(191);not null"`
 	TotalPrice        int
 	TotalPoint        int
@@ -18,8 +18,10 @@ type Transaction struct {
 	PointUsed         int
 	DiscountAmount    int
 	CourierName       string
+	ShippingCost      int
 	NoReceipt         string
-	Status            string
+	Status            string 
+	PaymentURL        string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	TransactionDetail []TransactionDetail `gorm:"foreignKey:TransactionId;references:Id;constraint:OnDelete:CASCADE"`
@@ -31,9 +33,9 @@ type TransactionDetail struct {
 	Id            string `gorm:"primaryKey;type:varchar(191);not null"`
 	TransactionId string `gorm:"type:varchar(191);not null"`
 	ProductId     string `gorm:"type:varchar(191);not null"`
+	Size          string `gorm:"type:varchar(10);not null"`
 	Quantity      int
 	TotalPrice    int
-	TotalPoint    int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	Product       product.Product `gorm:"foreignKey:ProductId;references:Id"`

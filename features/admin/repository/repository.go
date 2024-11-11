@@ -4,6 +4,7 @@ import (
 	"skripsi/features/admin/entity"
 	"skripsi/features/admin/interfaces"
 	"skripsi/features/admin/mapping"
+	"skripsi/features/admin/model"
 
 	"gorm.io/gorm"
 )
@@ -33,7 +34,7 @@ func (a *adminRepository) Register(data entity.AdminCore) (entity.AdminCore, err
 
 // FindByEmail implements interfaces.AdminRepositoryInterface.
 func (a *adminRepository) FindByEmail(email string) (entity.AdminCore, error) {
-	dataAdmin := entity.AdminCore{}
+	dataAdmin := model.Admin{}
 
 	tx := a.db.Where("email = ?", email).First(&dataAdmin)
 	if tx.RowsAffected == 0 {
@@ -44,5 +45,7 @@ func (a *adminRepository) FindByEmail(email string) (entity.AdminCore, error) {
 		return entity.AdminCore{}, tx.Error
 	}
 
-	return dataAdmin, nil
+	dataResponse := mapping.AdminModelToAdminCore(dataAdmin)
+
+	return dataResponse, nil
 }
