@@ -20,6 +20,7 @@ env:
   API_SECRET: ${{ secrets.API_SECRET }}
   API_NAME: ${{ secrets.API_NAME }}
   API_KEY: ${{ secrets.API_KEY }}
+  MIDTRANS_SERVER_KEY: ${{ secrets.MIDTRANS_SERVER_KEY }}
 
 jobs:
   deploy:
@@ -70,6 +71,7 @@ jobs:
             API_SECRET=${{ env.API_SECRET }}
             API_NAME=${{ env.API_NAME }}
             API_KEY=${{ env.API_KEY }}
+            MIDTRANS_SERVER_KEY=${{ env.MIDTRANS_SERVER_KEY }}
   
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

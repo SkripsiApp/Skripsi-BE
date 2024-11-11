@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"os"
 	address "skripsi/features/address/interfaces"
 	product "skripsi/features/product/interfaces"
 	"skripsi/features/transaction/entity"
@@ -11,6 +12,7 @@ import (
 	voucher "skripsi/features/voucher/interfaces"
 	"skripsi/utils/helper"
 
+	"github.com/joho/godotenv"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
 )
@@ -147,8 +149,9 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		return entity.TransactionCore{}, err
 	}
 
+	godotenv.Load()
 	midtransClient := snap.Client{}
-	midtransClient.New("SB-Mid-server-YCb-jBlX8BE6NZWIsQvW7hTA", midtrans.Sandbox)
+	midtransClient.New(os.Getenv("MIDTRANS_SERVER_KEY"), midtrans.Sandbox)
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
