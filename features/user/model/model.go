@@ -22,5 +22,5 @@ type Users struct {
 	Transaction []transaction.Transaction `gorm:"foreignKey:UserId;references:Id"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeleteAt    gorm.DeletedAt `gorm:"index"`
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
