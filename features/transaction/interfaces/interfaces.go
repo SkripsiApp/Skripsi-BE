@@ -11,6 +11,8 @@ type TransactionRepositoryInterface interface {
 	GetAllTransaction(search string, page, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error)
 	GetTransactionById(id string) (entity.TransactionCore, error)
 	UpdateStatusTransactionById(id, status string) error
+	GetAllTransactionByUserId(userId string, search string, page, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error)
+	UpdateNoReceiptTransactionById(id, resi string) error
 }
 
 type TransactionServiceInterface interface {
@@ -19,4 +21,6 @@ type TransactionServiceInterface interface {
 	GetTransactionById(id string) (entity.TransactionCore, error)
 	UpdateStatusTransactionById(id, status string) error
 	HandleMidtransNotification(notification helper.MidtransNotificationPayload) error
+	GetAllTransactionByUserId(userId string, search string, page, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error)
+	UpdateNoReceiptTransactionById(id, resi string) error
 }

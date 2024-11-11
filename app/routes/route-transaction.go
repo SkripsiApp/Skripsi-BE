@@ -28,5 +28,8 @@ func RouteTransaction(e *echo.Group, db *gorm.DB) {
 	transaction.POST("", transactionController.CreateTransaction, jwt.JWTMiddleware())
 	transaction.GET("", transactionController.GetAllTransaction, jwt.JWTMiddleware())
 	transaction.GET("/:id", transactionController.GetTransactionById, jwt.JWTMiddleware())
+	transaction.PUT("/:id", transactionController.UpdateNoReceipt, jwt.JWTMiddleware())
 	transaction.POST("/midtrans/notification", transactionController.HandleMidtransNotification)
+
+	transaction.GET("/profile", transactionController.GetAllTransactionByUserId, jwt.JWTMiddleware())
 }

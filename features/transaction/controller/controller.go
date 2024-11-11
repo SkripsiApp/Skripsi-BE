@@ -111,3 +111,54 @@ func (t *transactionController) GetTransactionById(e echo.Context) error {
 
 	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
 }
+
+func (t *transactionController) GetAllTransactionByUserId (e echo.Context) error {
+	id, _, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return errExtract
+	}
+
+	search := e.QueryParam("search")
+	page, _ := strconv.Atoi(e.QueryParam("page"))
+	limit, _ := strconv.Atoi(e.QueryParam("limit"))
+
+	data, pageInfo, totalCount, err := t.transactionService.GetAllTransactionByUserId(id, search, page, limit)
+	if err != nil {
+		return err
+	}
+
+	if len(data) == 0 {
+		return helper.ResponseError(200, "data belum tersedia")
+	}
+
+	response := response.ListTransactionCoreToTransactionResponse(data)
+
+	return e.JSON(200, helper.ResponseSuccessWithPagnationAndCount(constant.SUCCESS_GET_DATA, response, pageInfo, totalCount))
+}
+
+func (t *transactionController) UpdateNoReceipt(e echo.Context) error {
+	_, role, errExtract := jwt.ExtractToken(e)
+	if role != constant.ADMIN {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+	}
+
+	if errExtract != nil {
+		return errExtract
+	}
+
+	id := e.Param("id")
+
+	input := request.NoReceiptRequest{}
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, "invalid input data")
+	}
+
+	err := t.transactionService.UpdateNoReceiptTransactionById(id, input.NoReceipt)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccess("no resi berhasil diupdate"))
+}
+
