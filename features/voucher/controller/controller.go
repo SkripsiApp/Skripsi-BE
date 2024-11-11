@@ -23,9 +23,13 @@ func NewVoucherController(voucherService interfaces.VoucherServiceInterface) *vo
 }
 
 func (v *voucherController) Create(e echo.Context) error {
-	id, _, errExtract := jwt.ExtractToken(e)
+	id, role, errExtract := jwt.ExtractToken(e)
 	if errExtract != nil {
 		return errExtract
+	}
+
+	if role != constant.ADMIN {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
 	}
 
 	input := request.VoucherRequest{}
@@ -42,10 +46,19 @@ func (v *voucherController) Create(e echo.Context) error {
 		return err
 	}
 
-	return e.JSON(200, helper.ResponseSuccess(constant.SUCCESS_CREATE_DATA))
+	return e.JSON(201, helper.ResponseSuccess(constant.SUCCESS_CREATE_DATA))
 }
 
 func (v *voucherController) DeleteById(e echo.Context) error {
+	_, role, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return errExtract
+	}
+
+	if role != constant.ADMIN {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+	}
+
 	id := e.Param("id")
 	err := v.voucherService.DeleteById(id)
 	if err != nil {
@@ -88,6 +101,15 @@ func (v *voucherController) GetById(e echo.Context) error {
 }
 
 func (v *voucherController) UpdateById(e echo.Context) error {
+	_, role, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return errExtract
+	}
+
+	if role != constant.ADMIN {
+		return helper.ResponseError(401, constant.ERROR_AKSES_ROLE)
+	}
+
 	id := e.Param("id")
 
 	input := request.VoucherRequest{}
