@@ -238,7 +238,6 @@ func (t *transactionService) HandleMidtransNotification(notification helper.Midt
 	// }
 
 	transaction.PaymentType = notification.PaymentType
-	transaction.PaymentCode = notification.PaymentCode
 
 	// Handle different transaction statuses
 	switch notification.TransactionStatus {
@@ -259,7 +258,6 @@ func (t *transactionService) HandleMidtransNotification(notification helper.Midt
 		return t.transactionRepository.UpdatePaymentDetails(
 			transaction.Id,
 			notification.PaymentType,
-			notification.PaymentCode,
 			transaction.Status,
 		)
 	}

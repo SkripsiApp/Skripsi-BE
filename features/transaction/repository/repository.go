@@ -134,12 +134,11 @@ func (t *transactionRepository) UpdateNoReceiptTransactionById(id, resi string) 
 }
 
 // UpdatePaymentDetails implements interfaces.TransactionRepositoryInterface.
-func (t *transactionRepository) UpdatePaymentDetails(transactionId string, paymentType string, paymentCode string, status string) error {
+func (t *transactionRepository) UpdatePaymentDetails(transactionId string, paymentType string, status string) error {
 	data := model.Transaction{}
 
 	tx := t.db.Model(&data).Where("id = ?", transactionId).Updates(map[string]interface{}{
 		"payment_type": paymentType,
-		"payment_code": paymentCode,
 		"status":       status,
 	})
 

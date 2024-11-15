@@ -18,7 +18,6 @@ type TransactionCore struct {
 	NoReceipt         string
 	Status            string
 	PaymentType       string
-	PaymentCode       string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	TransactionDetail []TransactionDetailCore
