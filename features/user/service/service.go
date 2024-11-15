@@ -5,9 +5,11 @@ import (
 	"skripsi/features/user/entity"
 	"skripsi/features/user/interfaces"
 	"skripsi/utils/constant"
+	"skripsi/utils/email"
 	"skripsi/utils/helper"
 	"skripsi/utils/jwt"
 	"skripsi/utils/pagination"
+	"time"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -155,6 +157,102 @@ func (u *userService) UpdateById(id string, data entity.UsersCore) error {
 	err := u.userRepo.UpdateById(id, data)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// SendOTP implements interfaces.UserServiceInterrace.
+func (us *userService) SendOTP(emailUser string) error {
+	if emailUser == "" {
+		return helper.ResponseError(400, constant.ERROR_EMPTY)
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(emailUser) {
+		return helper.ResponseError(400, constant.ERROR_FORMAT_EMAIL)
+	}
+
+	otp, errGenerate := email.GenerateOTP(6)
+	if errGenerate != nil {
+		return helper.ResponseError(500, "gagal generate otp")
+	}
+
+	expired := time.Now().Add(5 * time.Minute).Unix()
+
+	_, errSend := us.userRepo.SendOTP(emailUser, otp, expired)
+	if errSend != nil {
+		return errSend
+	}
+
+	if email.ContainsLowerCase(otp) {
+		return helper.ResponseError(400, "otp tidak boleh mengandung huruf kecil")
+	}
+
+	email.SendOTPEmail(emailUser, otp)
+	return nil
+}
+
+// VerifyOTP implements interfaces.UserServiceInterrace.
+func (us *userService) VerifyOTP(email, otp string) (string, error) {
+	if email == "" || otp == "" {
+		return "", helper.ResponseError(400, constant.ERROR_EMPTY)
+	}
+
+	data, err := us.userRepo.VerifyOTP(email, otp)
+	if err != nil {
+		return "", helper.ResponseError(400, "email atau otp salah")
+	}
+
+	if data.OtpExpired <= time.Now().Unix() {
+		return "", helper.ResponseError(400, "otp sudah kadaluarsa")
+	}
+
+	if data.Otp != otp {
+		return "", helper.ResponseError(400, "otp tidak valid")
+	}
+
+	token, err := jwt.CreateTokenVerifikasi(email)
+	if err != nil {
+		return "", helper.ResponseError(500, "gagal generate token")
+	}
+
+	_, errReset := us.userRepo.ResetOTP(otp)
+	if errReset != nil {
+		return "", errReset
+	}
+
+	return token, nil
+}
+
+// NewPassword implements interfaces.UserServiceInterrace.
+func (us *userService) NewPassword(email string, data entity.UsersCore) error {
+	if email == "" || data.Password == "" || data.ConfirmPassword == "" {
+		return helper.ResponseError(400, constant.ERROR_EMPTY)
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(email) {
+		return helper.ResponseError(400, constant.ERROR_FORMAT_EMAIL)
+	}
+
+	if len(data.Password) < 6 {
+		return helper.ResponseError(400, constant.ERROR_LENGTH_PASSWORD)
+	}
+
+	if data.Password != data.ConfirmPassword {
+		return helper.ResponseError(400, constant.ERROR_CONFIRM_PASSWORD)
+	}
+
+	hashedPassword, err := helper.HashPassword(data.Password)
+	if err != nil {
+		return helper.ResponseError(500, constant.ERROR_HASH_PASSWORD)
+	}
+	data.Password = hashedPassword
+
+	_, err = us.userRepo.NewPassword(email, data)
+	if err != nil {
+		return  err
 	}
 
 	return nil

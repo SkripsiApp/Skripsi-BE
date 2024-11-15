@@ -119,3 +119,62 @@ func (uh *userController) Login(e echo.Context) error {
 
 	return e.JSON(200, helper.ResponseSuccessWithData("berhasil melakukan login", response))
 }
+
+func (uh *userController) SendOTP(e echo.Context) error {
+	input := request.UserSendOTP{}
+
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, "invalid input data")
+	}
+
+	userCore := request.UserRequestOTPToUserCore(input)
+
+	err := uh.userService.SendOTP(userCore.Email)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccess("otp berhasil dikirim"))
+}
+
+func (uh *userController) VerifyOTP(e echo.Context) error {
+	input := request.UserVerifyOTP{}
+
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, "invalid input data")
+	}
+
+	request := request.UserRequestVerifyOTPToUserCore(input)
+
+	token, err := uh.userService.VerifyOTP(request.Email, request.Otp)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccessWithData("verifikasi otp berhasil", token))
+}
+
+func (uh *userController) NewPassword(e echo.Context) error {
+	input := request.UserNewPassword{}
+
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, "invalid input data")
+	}
+
+	email, errExtract := jwt.ExtractTokenVerifikasi(e)
+	if errExtract != nil {
+		return helper.ResponseError(401, "invalid token")
+	}
+
+	request := request.UserRequestNewPasswordToUserCore(input)
+
+	err := uh.userService.NewPassword(email, request)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccess("password berhasil diubah"))
+}

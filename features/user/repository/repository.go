@@ -7,6 +7,7 @@ import (
 	"skripsi/features/user/mapping"
 	"skripsi/features/user/model"
 	"skripsi/utils/constant"
+	"skripsi/utils/helper"
 	"skripsi/utils/pagination"
 
 	"gorm.io/gorm"
@@ -132,5 +133,95 @@ func (ur *userRepository) FindByUsername(username string) (entity.UsersCore, err
 	}
 
 	dataResponse := mapping.UserModelToUserCore(dataUser)
+	return dataResponse, nil
+}
+
+// SendOTP implements interfaces.UserRepositoryInterface.
+func (ur *userRepository) SendOTP(email, otp string, expiry int64) (entity.UsersCore, error) {
+	dataUser := model.Users{}
+
+	tx := ur.db.Where("email = ?", email).First(&dataUser)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.UsersCore{}, helper.ResponseError(404, constant.ERROR_DATA_EMAIL)
+		}
+		return entity.UsersCore{}, tx.Error
+	}
+
+	if tx.Error != nil {
+		return entity.UsersCore{}, tx.Error
+	}
+
+	dataUser.Otp = otp
+	dataUser.OtpExpired = expiry
+
+	tx = ur.db.Save(&dataUser)
+	if tx.Error != nil {
+		return entity.UsersCore{}, tx.Error
+	}
+
+	dataResponse := mapping.UserModelToUserCore(dataUser)
+	return dataResponse, nil
+}
+
+// VerifyOTP implements interfaces.UserRepositoryInterface.
+func (ur *userRepository) VerifyOTP(email, otp string) (entity.UsersCore, error) {
+	dataUsers := model.Users{}
+
+	tx := ur.db.Where("otp = ? AND email = ?", otp, email).First(&dataUsers)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.UsersCore{}, helper.ResponseError(404, "email atau otp tidak ditemukan")
+		}
+		return entity.UsersCore{}, tx.Error
+	}
+
+	dataResponse := mapping.UserModelToUserCore(dataUsers)
+	return dataResponse, nil
+}
+
+// ResetOTP implements interfaces.UserRepositoryInterface.
+func (ur *userRepository) ResetOTP(otp string) (entity.UsersCore, error) {
+	dataUsers := model.Users{}
+
+	tx := ur.db.Where("otp = ?", otp).First(&dataUsers)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.UsersCore{}, helper.ResponseError(404, "otp tidak ditemukan")
+		}
+		return entity.UsersCore{}, tx.Error
+	}
+
+	dataUsers.Otp = ""
+	dataUsers.OtpExpired = 0
+
+	tx = ur.db.Save(&dataUsers)
+	if tx.Error != nil {
+		return entity.UsersCore{}, tx.Error
+	}
+
+	dataResponse := mapping.UserModelToUserCore(dataUsers)
+	return dataResponse, nil
+}
+
+// NewPassword implements interfaces.UserRepositoryInterface.
+func (ur *userRepository) NewPassword(email string, data entity.UsersCore) (entity.UsersCore, error) {
+	dataUsers := model.Users{}
+
+	tx := ur.db.Where("email = ?", email).First(&dataUsers)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return entity.UsersCore{}, helper.ResponseError(404, constant.ERROR_DATA_EMAIL)
+		}
+		return entity.UsersCore{}, tx.Error
+	}
+
+	errUpdate := ur.db.Model(&dataUsers).Updates(mapping.UserCoreToUserModel(data))
+	if errUpdate != nil {
+		return entity.UsersCore{}, errUpdate.Error
+	}
+
+	dataResponse := mapping.UserModelToUserCore(dataUsers)
+
 	return dataResponse, nil
 }
