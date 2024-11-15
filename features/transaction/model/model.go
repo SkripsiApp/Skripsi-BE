@@ -22,7 +22,6 @@ type Transaction struct {
 	ShippingCost      int
 	NoReceipt         string
 	Status            string
-	PaymentURL        string
 	PaymentType       string
 	PaymentCode       string
 	CreatedAt         time.Time

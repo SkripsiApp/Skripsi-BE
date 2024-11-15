@@ -18,9 +18,31 @@ func TransactionCoreToTransactionResponse(data entity.TransactionCore) Transacti
 		ShippingCost:      data.ShippingCost,
 		NoReceipt:         data.NoReceipt,
 		Status:            data.Status,
-		PaymentURL:        data.PaymentURL,
 		CreatedAt:         data.CreatedAt,
 		UpdatedAt:         data.UpdatedAt,
+		TransactionDetails: ListTransactionDetailCoreToTransactionDetailResponse(data.TransactionDetail),
+	}
+}
+
+func TransactionCoreToTransactionResponseWithSnap(data entity.TransactionCore, snap string) TransactionResponse {
+	return TransactionResponse{
+		Id:                data.Id,
+		UserId:            data.UserId,
+		VoucherId:         data.VoucherId,
+		AddressId:         data.AddressId,
+		OriginalPrice:     data.OriginalPrice,
+		TotalPrice:        data.TotalPrice,
+		TotalPoint:        data.TotalPoint,
+		UsePoint:          data.UsePoint,
+		PointUsed:         data.PointUsed,
+		DiscountAmount:    data.DiscountAmount,
+		CourierName:       data.CourierName,
+		ShippingCost:      data.ShippingCost,
+		NoReceipt:         data.NoReceipt,
+		Status:            data.Status,
+		CreatedAt:         data.CreatedAt,
+		UpdatedAt:         data.UpdatedAt,
+		PaymentURL:        snap,
 		TransactionDetails: ListTransactionDetailCoreToTransactionDetailResponse(data.TransactionDetail),
 	}
 }
