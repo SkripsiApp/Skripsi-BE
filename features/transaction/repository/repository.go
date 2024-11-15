@@ -1,10 +1,13 @@
 package repository
 
 import (
+	"errors"
 	"skripsi/features/transaction/entity"
 	"skripsi/features/transaction/interfaces"
 	"skripsi/features/transaction/mapping"
 	"skripsi/features/transaction/model"
+	"skripsi/utils/constant"
+	"skripsi/utils/helper"
 	"skripsi/utils/pagination"
 
 	"gorm.io/gorm"
@@ -130,3 +133,22 @@ func (t *transactionRepository) UpdateNoReceiptTransactionById(id, resi string) 
 	return nil
 }
 
+// UpdatePaymentDetails implements interfaces.TransactionRepositoryInterface.
+func (t *transactionRepository) UpdatePaymentDetails(transactionId string, paymentType string, paymentCode string, status string) error {
+	data := model.Transaction{}
+
+	tx := t.db.Model(&data).Where("id = ?", transactionId).Updates(map[string]interface{}{
+		"payment_type": paymentType,
+		"payment_code": paymentCode,
+		"status":       status,
+	})
+
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+		}
+		return tx.Error
+	}
+
+	return nil
+}

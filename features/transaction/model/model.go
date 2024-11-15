@@ -23,6 +23,8 @@ type Transaction struct {
 	NoReceipt         string
 	Status            string
 	PaymentURL        string
+	PaymentType       string
+	PaymentCode       string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	TransactionDetail []TransactionDetail `gorm:"foreignKey:TransactionId;references:Id;constraint:OnDelete:CASCADE"`
