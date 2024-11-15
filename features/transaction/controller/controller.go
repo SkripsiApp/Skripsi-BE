@@ -38,12 +38,12 @@ func (t *transactionController) CreateTransaction(e echo.Context) error {
 	data := request.TransactionRequestToTransactionCore(input)
 	data.UserId = id
 
-	transaction, err := t.transactionService.CreateTransaction(data)
+	transaction, snapResponse, err := t.transactionService.CreateTransaction(data)
 	if err != nil {
 		return err
 	}
 
-	response := response.TransactionCoreToTransactionResponse(transaction)
+	response := response.TransactionCoreToTransactionResponseWithSnap(transaction, snapResponse)
 	return e.JSON(200, helper.ResponseSuccessWithData("transaksi berhasil dibuat", response))
 }
 

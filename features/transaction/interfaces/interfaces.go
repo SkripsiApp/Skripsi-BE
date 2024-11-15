@@ -17,7 +17,7 @@ type TransactionRepositoryInterface interface {
 }
 
 type TransactionServiceInterface interface {
-	CreateTransaction(data entity.TransactionCore) (entity.TransactionCore, error)
+	CreateTransaction(data entity.TransactionCore) (entity.TransactionCore, string, error)
 	GetAllTransaction(search string, page, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error)
 	GetTransactionById(id string) (entity.TransactionCore, error)
 	UpdateStatusTransactionById(id, status string) error

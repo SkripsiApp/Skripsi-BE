@@ -38,16 +38,16 @@ func NewTransactionService(transactionRepository transaction.TransactionReposito
 }
 
 // CreateTransaction implements interfaces.TransactionServiceInterface.
-func (t *transactionService) CreateTransaction(data entity.TransactionCore) (entity.TransactionCore, error) {
+func (t *transactionService) CreateTransaction(data entity.TransactionCore) (entity.TransactionCore, string, error) {
 	if data.UserId == "" {
-		return entity.TransactionCore{}, helper.ResponseError(400, "user id tidak boleh kosong")
+		return entity.TransactionCore{}, "", helper.ResponseError(400, "user id tidak boleh kosong")
 	}
 
 	var discountAmount int
 	if data.VoucherId != nil {
 		voucher, err := t.voucherRepository.GetById(*data.VoucherId)
 		if err != nil {
-			return entity.TransactionCore{}, helper.ResponseError(400, "voucher tidak ditemukan")
+			return entity.TransactionCore{}, "", helper.ResponseError(400, "voucher tidak ditemukan")
 		}
 
 		discountAmount += voucher.Discount
@@ -55,12 +55,12 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	}
 
 	if data.AddressId == "" {
-		return entity.TransactionCore{}, helper.ResponseError(400, "alamat tidak boleh kosong")
+		return entity.TransactionCore{}, "", helper.ResponseError(400, "alamat tidak boleh kosong")
 	}
 
 	address, err := t.addressRepository.GetById(data.AddressId, data.UserId)
 	if err != nil {
-		return entity.TransactionCore{}, helper.ResponseError(400, "alamat tidak ditemukan")
+		return entity.TransactionCore{}, "", helper.ResponseError(400, "alamat tidak ditemukan")
 	}
 
 	data.AddressId = address.Id
@@ -71,24 +71,24 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	for i, detail := range data.TransactionDetail {
 		product, err := t.productRepository.GetById(detail.ProductId)
 		if err != nil {
-			return entity.TransactionCore{}, helper.ResponseError(400, "produk tidak ditemukan")
+			return entity.TransactionCore{}, "", helper.ResponseError(400, "produk tidak ditemukan")
 		}
 
 		productSize, err := t.productRepository.GetProductIdAndSize(detail.ProductId, detail.Size)
 		if err != nil {
-			return entity.TransactionCore{}, helper.ResponseError(400, "ukuran produk tidak ditemukan")
+			return entity.TransactionCore{}, "", helper.ResponseError(400, "ukuran produk tidak ditemukan")
 		}
 
 		if productSize.Stock < detail.Quantity {
-			return entity.TransactionCore{}, helper.ResponseError(400, "stock produk tidak mencukupi")
+			return entity.TransactionCore{}, "", helper.ResponseError(400, "stock produk tidak mencukupi")
 		}
 
 		if err := t.productRepository.DecreaseStock(productSize.Id, detail.Quantity); err != nil {
-			return entity.TransactionCore{}, err
+			return entity.TransactionCore{}, "", err
 		}
 
 		if err := t.productRepository.IncreaseSold(detail.ProductId, detail.Quantity); err != nil {
-			return entity.TransactionCore{}, err
+			return entity.TransactionCore{}, "", err
 		}
 
 		itemDetails = append(itemDetails, midtrans.ItemDetails{
@@ -108,14 +108,14 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	var updatedPoint int
 	user, err := t.userRepository.GetById(data.UserId)
 	if err != nil {
-		return entity.TransactionCore{}, helper.ResponseError(400, "user tidak ditemukan")
+		return entity.TransactionCore{}, "", helper.ResponseError(400, "user tidak ditemukan")
 	}
 
 	updatedPoint = user.Point
 
 	if data.UsePoint && data.PointUsed > 0 {
 		if user.Point < data.PointUsed {
-			return entity.TransactionCore{}, helper.ResponseError(400, "point tidak cukup")
+			return entity.TransactionCore{}, "", helper.ResponseError(400, "point tidak cukup")
 		}
 		discountAmount += data.PointUsed
 		updatedPoint -= data.PointUsed
@@ -155,7 +155,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	data.Status = "Pending"
 	transaction, err := t.transactionRepository.CreateTransaction(data)
 	if err != nil {
-		return entity.TransactionCore{}, err
+		return entity.TransactionCore{}, "", err
 	}
 
 	godotenv.Load()
@@ -179,16 +179,16 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 
 	snapResp, err := midtransClient.CreateTransaction(req)
 	if snapResp == nil || snapResp.RedirectURL == "" {
-		return entity.TransactionCore{}, helper.ResponseError(500, "gagal mendapatkan URL pembayaran dari Midtrans")
+		return entity.TransactionCore{}, "", helper.ResponseError(500, "gagal mendapatkan URL pembayaran dari Midtrans")
 	}
 
-	transaction.PaymentURL = snapResp.RedirectURL
+	snapRedirectURL := snapResp.RedirectURL
 
 	if err := t.userRepository.UpdateById(data.UserId, userCore.UsersCore{Point: updatedPoint}); err != nil {
-		return entity.TransactionCore{}, err
+		return entity.TransactionCore{}, "", err
 	}
 
-	return transaction, nil
+	return transaction, snapRedirectURL, nil
 }
 
 // GetAllTransaction implements interfaces.TransactionServiceInterface.
@@ -233,9 +233,9 @@ func (t *transactionService) HandleMidtransNotification(notification helper.Midt
 		return helper.ResponseError(404, "transaksi tidak ditemukan")
 	}
 
-	if transaction.Status != "Pending" {
-		return nil
-	}
+	// if transaction.Status != "Pending" {
+	// 	return nil
+	// }
 
 	transaction.PaymentType = notification.PaymentType
 	transaction.PaymentCode = notification.PaymentCode
