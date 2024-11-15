@@ -12,6 +12,10 @@ type UserRepositoryInterface interface {
 	FindByEmail(email string) (entity.UsersCore, error)
 	FindByUsername(username string) (entity.UsersCore, error)
 	UpdateById(id string, data entity.UsersCore) error
+	SendOTP(email, otp string, expiry int64) (entity.UsersCore, error)
+	VerifyOTP(email, otp string) (entity.UsersCore, error)
+	ResetOTP(otp string) (entity.UsersCore, error)
+	NewPassword(email string, data entity.UsersCore) (entity.UsersCore, error)
 }
 
 type UserServiceInterrace interface {
@@ -20,4 +24,7 @@ type UserServiceInterrace interface {
 	GetById(id string) (entity.UsersCore, error)
 	GetAll(search string, page, limit int) ([]entity.UsersCore, pagination.PageInfo, int, error)
 	UpdateById(id string, data entity.UsersCore) error
+	SendOTP(emailUser string) error
+	VerifyOTP(email, otp string) (string, error)
+	NewPassword(email string, data entity.UsersCore) error
 }

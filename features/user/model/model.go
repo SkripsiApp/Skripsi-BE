@@ -17,7 +17,7 @@ type Users struct {
 	Point       int    `gorm:"default:0"`
 	Role        string `gorm:"default:user"`
 	Otp         string
-	OtpExpired  string
+	OtpExpired  int64
 	Address     []address.Address         `gorm:"foreignKey:UserId;references:Id"`
 	Transaction []transaction.Transaction `gorm:"foreignKey:UserId;references:Id"`
 	CreatedAt   time.Time

@@ -16,7 +16,7 @@ type UsersCore struct {
 	Point           int
 	Role            string
 	Otp             string
-	OtpExpired      string
+	OtpExpired      int64
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt
