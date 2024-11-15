@@ -13,6 +13,7 @@ type TransactionRepositoryInterface interface {
 	UpdateStatusTransactionById(id, status string) error
 	GetAllTransactionByUserId(userId string, search string, page, limit int) ([]entity.TransactionCore, pagination.PageInfo, int, error)
 	UpdateNoReceiptTransactionById(id, resi string) error
+	UpdatePaymentDetails(transactionId, paymentType, paymentCode, status string) error
 }
 
 type TransactionServiceInterface interface {

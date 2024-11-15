@@ -237,6 +237,9 @@ func (t *transactionService) HandleMidtransNotification(notification helper.Midt
 		return nil
 	}
 
+	transaction.PaymentType = notification.PaymentType
+	transaction.PaymentCode = notification.PaymentCode
+
 	// Handle different transaction statuses
 	switch notification.TransactionStatus {
 	case "capture":
@@ -255,7 +258,7 @@ func (t *transactionService) HandleMidtransNotification(notification helper.Midt
 
 	// Update transaction status if it was changed but not processed
 	if transaction.Status != "Pending" {
-		return t.transactionRepository.UpdateStatusTransactionById(transaction.Id, transaction.Status)
+		return t.transactionRepository.UpdatePaymentDetails(transaction.Id, transaction.PaymentType, transaction.PaymentCode, transaction.Status)
 	}
 
 	return nil
