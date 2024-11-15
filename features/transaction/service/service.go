@@ -254,11 +254,14 @@ func (t *transactionService) HandleMidtransNotification(notification helper.Midt
 
 	case "cancel", "deny", "expire", "failure":
 		return t.processFailedPayment(transaction)
-	}
 
-	// Update transaction status if it was changed but not processed
-	if transaction.Status != "Pending" {
-		return t.transactionRepository.UpdatePaymentDetails(transaction.Id, transaction.PaymentType, transaction.PaymentCode, transaction.Status)
+	default:
+		return t.transactionRepository.UpdatePaymentDetails(
+			transaction.Id,
+			notification.PaymentType,
+			notification.PaymentCode,
+			transaction.Status,
+		)
 	}
 
 	return nil
