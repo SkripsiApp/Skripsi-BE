@@ -10,6 +10,7 @@ type ProductRequest struct {
 }
 
 type ProductSizeRequest struct {
-	Size  string `json:"size" form:"size"`
-	Stock int    `json:"stock" form:"stock"`
+	Size        string `json:"size" form:"size"`
+	Description string `json:"description" form:"description"`
+	Stock       int    `json:"stock" form:"stock"`
 }

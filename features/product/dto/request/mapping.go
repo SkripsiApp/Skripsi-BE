@@ -24,12 +24,12 @@ func ListProductRequestToProductCore(data []ProductRequest) []entity.ProductCore
 	return listProductCore
 }
 
-
 // Product Size Request To Product Size Core
 func ProductSizeRequestToProductSizeCore(data ProductSizeRequest) entity.ProductSizeCore {
 	productSizeCore := entity.ProductSizeCore{
-		Size:  data.Size,
-		Stock: data.Stock,
+		Size:        data.Size,
+		Description: data.Description,
+		Stock:       data.Stock,
 	}
 	return productSizeCore
 }

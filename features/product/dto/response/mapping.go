@@ -26,9 +26,10 @@ func ListProductCoreToListProductResponse(products []entity.ProductCore) []Produ
 
 func ProductSizeCoreToProductSizeResponse(productSize entity.ProductSizeCore) ProductSizeResponse {
 	return ProductSizeResponse{
-		Id:    productSize.Id,
-		Size:  productSize.Size,
-		Stock: productSize.Stock,
+		Id:          productSize.Id,
+		Size:        productSize.Size,
+		Description: productSize.Description,
+		Stock:       productSize.Stock,
 	}
 }
 
