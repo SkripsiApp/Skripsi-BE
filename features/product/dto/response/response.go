@@ -12,7 +12,8 @@ type ProductResponse struct {
 }
 
 type ProductSizeResponse struct {
-	Id    string `json:"id"`
-	Size  string `json:"size"`
-	Stock int    `json:"stock"`
+	Id          string `json:"id"`
+	Size        string `json:"size"`
+	Description string `json:"description"`
+	Stock       int    `json:"stock"`
 }

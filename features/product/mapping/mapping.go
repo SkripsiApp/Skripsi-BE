@@ -56,10 +56,11 @@ func ListProductModelToProductCore(data []model.Product) []entity.ProductCore {
 // Mapping Product Size Core to Model Product Size
 func ProductSizeCoreToProductSizeModel(data entity.ProductSizeCore) model.ProductSize {
 	productSizeModel := model.ProductSize{
-		Id:        data.Id,
-		ProductId: data.ProductId,
-		Size:      data.Size,
-		Stock:     data.Stock,
+		Id:          data.Id,
+		ProductId:   data.ProductId,
+		Size:        data.Size,
+		Description: data.Description,
+		Stock:       data.Stock,
 	}
 	return productSizeModel
 }
@@ -76,10 +77,11 @@ func ListProductSizeCoreToProductSizeModel(data []entity.ProductSizeCore) []mode
 // Mapping Product Size Model to Product Size Core
 func ProductSizeModelToProductSizeCore(data model.ProductSize) entity.ProductSizeCore {
 	productSizeCore := entity.ProductSizeCore{
-		Id:        data.Id,
-		ProductId: data.ProductId,
-		Size:      data.Size,
-		Stock:     data.Stock,
+		Id:          data.Id,
+		ProductId:   data.ProductId,
+		Size:        data.Size,
+		Description: data.Description,
+		Stock:       data.Stock,
 	}
 	return productSizeCore
 }

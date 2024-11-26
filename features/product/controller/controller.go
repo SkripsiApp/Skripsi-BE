@@ -52,12 +52,20 @@ func (p *productController) Create(e echo.Context) error {
 		if size == "" {
 			break
 		}
+
+		description := e.FormValue(fmt.Sprintf("product_size[%d].description", i))
+		if description == "" {
+			break
+		}
+
 		stock, err := strconv.Atoi(e.FormValue(fmt.Sprintf("product_size[%d].stock", i)))
 		if err != nil {
 			return helper.ResponseError(400, "invalid nilai stock")
 		}
+
 		productSizes = append(productSizes, request.ProductSizeRequest{
 			Size:  size,
+			Description: description,
 			Stock: stock,
 		})
 	}
@@ -139,12 +147,20 @@ func (p *productController) UpdateById(e echo.Context) error {
         if size == "" {
             break
         }
+
+		description := e.FormValue(fmt.Sprintf("product_size[%d].description", i))
+		if description == "" {
+			break
+		}
+
         stock, err := strconv.Atoi(e.FormValue(fmt.Sprintf("product_size[%d].stock", i)))
         if err != nil {
             return helper.ResponseError(400, "invalid nilai stock")
         }
+
         productSizes = append(productSizes, request.ProductSizeRequest{
             Size:  size,
+			Description: description,
             Stock: stock,
         })
     }

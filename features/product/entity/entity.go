@@ -21,11 +21,12 @@ type ProductCore struct {
 }
 
 type ProductSizeCore struct {
-	Id        string
-	ProductId string
-	Size      string
-	Stock     int
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	Id          string
+	ProductId   string
+	Size        string
+	Description string
+	Stock       int
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt
 }
