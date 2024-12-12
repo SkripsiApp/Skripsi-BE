@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"skripsi/features/transaction/dto/request"
 	"skripsi/features/transaction/dto/response"
 	"skripsi/features/transaction/interfaces"
@@ -34,6 +35,8 @@ func (t *transactionController) CreateTransaction(e echo.Context) error {
 	if errBind != nil {
 		return helper.ResponseError(400, "invalid input data")
 	}
+
+	fmt.Println("data input", input)
 
 	data := request.TransactionRequestToTransactionCore(input)
 	data.UserId = id
