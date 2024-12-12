@@ -115,17 +115,19 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	}
 
 	fmt.Printf("User's current points before transaction: %d\n", user.Point)
-	
+
 	if data.UsePoint && data.PointUsed > 0 {
+		fmt.Printf("Attempting to use points - UsePoint: %v, PointUsed: %d\n", data.UsePoint, data.PointUsed)
 		if user.Point < data.PointUsed {
 			return entity.TransactionCore{}, "", helper.ResponseError(400, "point tidak cukup")
 		}
 		discountAmount += data.PointUsed
 		updatedPoint = user.Point - data.PointUsed
 		fmt.Println("Points Used:", data.PointUsed)
-        fmt.Println("Updated Points Before Update:", updatedPoint) 
+        fmt.Println("Updated Points After Deduction:", updatedPoint)
 	} else {
 		updatedPoint = user.Point
+        fmt.Println("Not using points or PointUsed is 0")
 	}
 
 	if discountAmount > 0 {
@@ -157,6 +159,8 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	data.DiscountAmount = discountAmount
 	data.TotalPoint = totalPrice / 100
 
+	fmt.Printf("Final calculation - Total Price: %d, Discount Amount: %d, Total Point: %d\n", totalPrice, discountAmount, data.TotalPoint)
+	
 	// updatedPoint += data.TotalPoint
 
 	data.Status = "Pending"
