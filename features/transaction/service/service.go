@@ -119,6 +119,8 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		}
 		discountAmount += data.PointUsed
 		updatedPoint -= data.PointUsed
+		fmt.Println("Points Used:", data.PointUsed)
+        fmt.Println("Updated Points Before Update:", updatedPoint) 
 	}
 
 	if discountAmount > 0 {
@@ -184,6 +186,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 
 	snapRedirectURL := snapResp.RedirectURL
 
+	fmt.Println("Updating User Points:", updatedPoint)
 	if err := t.userRepository.UpdateById(data.UserId, userCore.UsersCore{Point: updatedPoint}); err != nil {
 		return entity.TransactionCore{}, "", err
 	}
