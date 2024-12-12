@@ -16,6 +16,7 @@ type UserRepositoryInterface interface {
 	VerifyOTP(email, otp string) (entity.UsersCore, error)
 	ResetOTP(otp string) (entity.UsersCore, error)
 	NewPassword(email string, data entity.UsersCore) (entity.UsersCore, error)
+	UpdatedPoint(id string, point int) error
 }
 
 type UserServiceInterrace interface {

@@ -160,7 +160,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	data.TotalPoint = totalPrice / 100
 
 	fmt.Printf("Final calculation - Total Price: %d, Discount Amount: %d, Total Point: %d\n", totalPrice, discountAmount, data.TotalPoint)
-	
+
 	// updatedPoint += data.TotalPoint
 
 	data.Status = "Pending"
@@ -196,7 +196,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	snapRedirectURL := snapResp.RedirectURL
 
 	fmt.Println("Updating User Points:", updatedPoint)
-	if err := t.userRepository.UpdateById(data.UserId, userCore.UsersCore{Point: updatedPoint}); err != nil {
+	if err := t.userRepository.UpdatedPoint(user.Id, updatedPoint); err != nil {
 		return entity.TransactionCore{}, "", err
 	}
 

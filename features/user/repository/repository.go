@@ -9,6 +9,7 @@ import (
 	"skripsi/utils/constant"
 	"skripsi/utils/helper"
 	"skripsi/utils/pagination"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -224,4 +225,24 @@ func (ur *userRepository) NewPassword(email string, data entity.UsersCore) (enti
 	dataResponse := mapping.UserModelToUserCore(dataUsers)
 
 	return dataResponse, nil
+}
+
+// updatedPoint implements interfaces.UserRepositoryInterface.
+func (ur *userRepository) UpdatedPoint(id string, point int) error {
+	tx := ur.db.Model(&model.Users{}).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"point":      point,
+			"updated_at": time.Now(),
+		})
+
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	if tx.RowsAffected == 0 {
+		return helper.ResponseError(404, constant.ERROR_DATA_ID)
+	}
+
+	return nil
 }
