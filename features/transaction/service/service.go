@@ -40,6 +40,7 @@ func NewTransactionService(transactionRepository transaction.TransactionReposito
 // CreateTransaction implements interfaces.TransactionServiceInterface.
 func (t *transactionService) CreateTransaction(data entity.TransactionCore) (entity.TransactionCore, string, error) {
 	fmt.Println("Received Transaction Data:", data)
+	fmt.Printf("Initial UsePoint: %v, PointUsed: %d\n", data.UsePoint, data.PointUsed)
 
 	if data.UserId == "" {
 		return entity.TransactionCore{}, "", helper.ResponseError(400, "user id tidak boleh kosong")
@@ -123,6 +124,8 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		updatedPoint -= data.PointUsed
 		fmt.Println("Points Used:", data.PointUsed)
         fmt.Println("Updated Points Before Update:", updatedPoint) 
+	} else {
+		fmt.Println("Not using points or PointUsed is 0")
 	}
 
 	if discountAmount > 0 {
@@ -193,6 +196,8 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		return entity.TransactionCore{}, "", err
 	}
 
+	fmt.Println("Transaction created successfully. Final transaction data:", transaction)
+	
 	return transaction, snapRedirectURL, nil
 }
 
