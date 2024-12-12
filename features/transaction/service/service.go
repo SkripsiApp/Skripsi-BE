@@ -39,6 +39,8 @@ func NewTransactionService(transactionRepository transaction.TransactionReposito
 
 // CreateTransaction implements interfaces.TransactionServiceInterface.
 func (t *transactionService) CreateTransaction(data entity.TransactionCore) (entity.TransactionCore, string, error) {
+	fmt.Println("Received Transaction Data:", data)
+
 	if data.UserId == "" {
 		return entity.TransactionCore{}, "", helper.ResponseError(400, "user id tidak boleh kosong")
 	}
