@@ -114,18 +114,18 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		return entity.TransactionCore{}, "", helper.ResponseError(400, "user tidak ditemukan")
 	}
 
-	updatedPoint = user.Point
-
+	fmt.Printf("User's current points before transaction: %d\n", user.Point)
+	
 	if data.UsePoint && data.PointUsed > 0 {
 		if user.Point < data.PointUsed {
 			return entity.TransactionCore{}, "", helper.ResponseError(400, "point tidak cukup")
 		}
 		discountAmount += data.PointUsed
-		updatedPoint -= data.PointUsed
+		updatedPoint = user.Point - data.PointUsed
 		fmt.Println("Points Used:", data.PointUsed)
         fmt.Println("Updated Points Before Update:", updatedPoint) 
 	} else {
-		fmt.Println("Not using points or PointUsed is 0")
+		updatedPoint = user.Point
 	}
 
 	if discountAmount > 0 {
@@ -197,7 +197,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	}
 
 	fmt.Println("Transaction created successfully. Final transaction data:", transaction)
-	
+
 	return transaction, snapRedirectURL, nil
 }
 
