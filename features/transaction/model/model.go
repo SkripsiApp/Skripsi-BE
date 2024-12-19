@@ -34,7 +34,6 @@ type TransactionDetail struct {
 	Id            string `gorm:"primaryKey;type:varchar(191);not null"`
 	TransactionId string `gorm:"type:varchar(191);not null"`
 	ProductId     string `gorm:"type:varchar(191);not null"`
-	Image         string `gorm:"type:varchar(191);not null"`
 	Size          string `gorm:"type:varchar(10);not null"`
 	Quantity      int
 	TotalPrice    int

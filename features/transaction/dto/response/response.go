@@ -24,10 +24,11 @@ type TransactionResponse struct {
 }
 
 type TransactionDetailResponse struct {
-	Id         string `json:"id"`
-	ProductId  string `json:"product_id"`
-	Image      string `json:"image"`
-	Size       string `json:"size"`
-	Quantity   int    `json:"quantity"`
-	TotalPrice int    `json:"total_price"`
+	Id          string `json:"id"`
+	ProductId   string `json:"product_id"`
+	ProductName string `json:"product_name"`
+	Image       string `json:"image"`
+	Size        string `json:"size"`
+	Quantity    int    `json:"quantity"`
+	TotalPrice  int    `json:"total_price"`
 }

@@ -100,8 +100,6 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 			Qty:   int32(detail.Quantity),
 			Name:  fmt.Sprintf("%s - Size: %s", product.Name, detail.Size),
 		})
-
-		data.TransactionDetail[i].Image = product.Image
 		
 		productTotalPrice := product.Price * detail.Quantity
 		totalPrice += productTotalPrice
