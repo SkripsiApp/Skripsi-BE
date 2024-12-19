@@ -27,6 +27,7 @@ type TransactionDetailCore struct {
 	Id            string
 	TransactionId string
 	ProductId     string
+	Image         string
 	Size          string
 	Quantity      int
 	TotalPrice    int
