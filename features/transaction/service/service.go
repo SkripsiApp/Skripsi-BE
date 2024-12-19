@@ -163,7 +163,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 
 	// updatedPoint += data.TotalPoint
 
-	data.Status = "Pending"
+	data.Status = "Belum Dibayar"
 	transaction, err := t.transactionRepository.CreateTransaction(data)
 	if err != nil {
 		return entity.TransactionCore{}, "", err
@@ -281,7 +281,7 @@ func (t *transactionService) HandleMidtransNotification(notification helper.Midt
 
 func (t *transactionService) processSuccessfulPayment(transaction entity.TransactionCore) error {
 	// Update transaction status
-	transaction.Status = "Paid"
+	transaction.Status = "Dibayar"
 	if err := t.transactionRepository.UpdateStatusTransactionById(transaction.Id, transaction.Status); err != nil {
 		return err
 	}
@@ -305,7 +305,7 @@ func (t *transactionService) processSuccessfulPayment(transaction entity.Transac
 // Helper method to process failed payments
 func (t *transactionService) processFailedPayment(transaction entity.TransactionCore) error {
 	// Update transaction status
-	transaction.Status = "Failed"
+	transaction.Status = "Dibatalkan"
 	if err := t.transactionRepository.UpdateStatusTransactionById(transaction.Id, transaction.Status); err != nil {
 		return err
 	}
@@ -390,11 +390,11 @@ func (t *transactionService) UpdateNoReceiptTransactionById(id string, resi stri
 		return helper.ResponseError(404, "transaksi tidak ditemukan")
 	}
 
-	if transaction.Status != "Paid" {
-		return helper.ResponseError(400, "status transaksi harus Paid")
+	if transaction.Status != "Dibayar" {
+		return helper.ResponseError(400, "status transaksi harus dibayar")
 	}
 
-	transaction.Status = "Shipped"
+	transaction.Status = "Dikirim"
 
 	err = t.transactionRepository.UpdateNoReceiptTransactionById(id, resi)
 	if err != nil {
@@ -418,8 +418,8 @@ func (t *transactionService) UpdateStatusTransactionUserById(userId string, tran
 		return helper.ResponseError(400, "status tidak boleh kosong")
 	}
 
-	if status != "Done" {
-		return helper.ResponseError(400, "status hanya bisa diupdate ke done")
+	if status != "Selesai" {
+		return helper.ResponseError(400, "status hanya bisa diupdate ke selesai")
 	}
 
 	transaction, err := t.transactionRepository.GetTransactionById(transactionId)
@@ -428,11 +428,11 @@ func (t *transactionService) UpdateStatusTransactionUserById(userId string, tran
 	}
 
 	if transaction.UserId != userId {
-		return helper.ResponseError(400, "transaksi tidak ditemukan")
+		return helper.ResponseError(400, "transaksi user tidak ditemukan")
 	}
 
-	if transaction.Status != "Shipped" {
-		return helper.ResponseError(400, "status transaksi harus shipped")
+	if transaction.Status != "Dikirim" {
+		return helper.ResponseError(400, "status transaksi harus dikirim")
 	}
 
 	err = t.transactionRepository.UpdateStatusTransactionUserById(userId, transactionId, status)
