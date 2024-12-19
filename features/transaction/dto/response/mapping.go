@@ -59,6 +59,7 @@ func TransactionDetailCoreToTransactionDetailResponse(data entity.TransactionDet
 	return TransactionDetailResponse{
 		Id:         data.Id,
 		ProductId:  data.ProductId,
+		Image:      data.Image,
 		Size:       data.Size,
 		Quantity:   data.Quantity,
 		TotalPrice: data.TotalPrice,
