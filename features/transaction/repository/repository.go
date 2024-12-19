@@ -151,3 +151,15 @@ func (t *transactionRepository) UpdatePaymentDetails(transactionId string, payme
 
 	return nil
 }
+
+// UpdateStatusTransactionUserById implements interfaces.TransactionRepositoryInterface.
+func (t *transactionRepository) UpdateStatusTransactionUserById(userId string, transactionId string, status string) error {
+	data := model.Transaction{}
+
+	tx := t.db.Model(&data).Where("id = ? AND user_id = ?", transactionId, userId).Update("status", status)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}
