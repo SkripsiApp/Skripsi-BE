@@ -125,7 +125,7 @@ func (t *transactionRepository) GetAllTransactionByUserId(userId string, search 
 func (t *transactionRepository) UpdateNoReceiptTransactionById(id, resi string) error {
 	data := model.Transaction{}
 
-	tx := t.db.Model(&data).Where("id = ?", id).Update("no_resi", resi)
+	tx := t.db.Model(&data).Where("id = ?", id).Update("no_receipt", resi)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -146,6 +146,18 @@ func (t *transactionRepository) UpdatePaymentDetails(transactionId string, payme
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
 		}
+		return tx.Error
+	}
+
+	return nil
+}
+
+// UpdateStatusTransactionUserById implements interfaces.TransactionRepositoryInterface.
+func (t *transactionRepository) UpdateStatusTransactionUserById(userId string, transactionId string, status string) error {
+	data := model.Transaction{}
+
+	tx := t.db.Model(&data).Where("id = ? AND user_id = ?", transactionId, userId).Update("status", status)
+	if tx.Error != nil {
 		return tx.Error
 	}
 

@@ -124,10 +124,10 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		discountAmount += data.PointUsed
 		updatedPoint = user.Point - data.PointUsed
 		fmt.Println("Points Used:", data.PointUsed)
-        fmt.Println("Updated Points After Deduction:", updatedPoint)
+		fmt.Println("Updated Points After Deduction:", updatedPoint)
 	} else {
 		updatedPoint = user.Point
-        fmt.Println("Not using points or PointUsed is 0")
+		fmt.Println("Not using points or PointUsed is 0")
 	}
 
 	if discountAmount > 0 {
@@ -397,6 +397,45 @@ func (t *transactionService) UpdateNoReceiptTransactionById(id string, resi stri
 	transaction.Status = "Shipped"
 
 	err = t.transactionRepository.UpdateNoReceiptTransactionById(id, resi)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateStatusTransactionUserById implements interfaces.TransactionServiceInterface.
+func (t *transactionService) UpdateStatusTransactionUserById(userId string, transactionId string, status string) error {
+	if userId == "" {
+		return helper.ResponseError(400, "user id tidak boleh kosong")
+	}
+
+	if transactionId == "" {
+		return helper.ResponseError(400, "id transaksi tidak boleh kosong")
+	}
+
+	if status == "" {
+		return helper.ResponseError(400, "status tidak boleh kosong")
+	}
+
+	if status != "Done" {
+		return helper.ResponseError(400, "status hanya bisa diupdate ke done")
+	}
+
+	transaction, err := t.transactionRepository.GetTransactionById(transactionId)
+	if err != nil {
+		return helper.ResponseError(404, "transaksi tidak ditemukan")
+	}
+
+	if transaction.UserId != userId {
+		return helper.ResponseError(400, "transaksi tidak ditemukan")
+	}
+
+	if transaction.Status != "Shipped" {
+		return helper.ResponseError(400, "status transaksi harus shipped")
+	}
+
+	err = t.transactionRepository.UpdateStatusTransactionUserById(userId, transactionId, status)
 	if err != nil {
 		return err
 	}

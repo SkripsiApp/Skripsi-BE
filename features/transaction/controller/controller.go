@@ -165,3 +165,25 @@ func (t *transactionController) UpdateNoReceipt(e echo.Context) error {
 	return e.JSON(200, helper.ResponseSuccess("no resi berhasil diupdate"))
 }
 
+func (t *transactionController) UpdateStatusTransactionUserById(e echo.Context) error {
+	id, _, errExtract := jwt.ExtractToken(e)
+	if errExtract != nil {
+		return errExtract
+	}
+
+	transactionId := e.Param("id")
+
+	input := request.UpdateStatusRequest{}
+	errBind := e.Bind(&input)
+	if errBind != nil {
+		return helper.ResponseError(400, "invalid input data")
+	}
+
+	err := t.transactionService.UpdateStatusTransactionUserById(id, transactionId, input.Status)
+	if err != nil {
+		return err
+	}
+
+	return e.JSON(200, helper.ResponseSuccess("status transaksi berhasil diupdate"))
+}
+

@@ -20,3 +20,7 @@ type TransactionDetailRequest struct {
 type NoReceiptRequest struct {
 	NoReceipt string `json:"no_receipt"`
 }
+
+type UpdateStatusRequest struct {
+	Status string `json:"status"`
+}
