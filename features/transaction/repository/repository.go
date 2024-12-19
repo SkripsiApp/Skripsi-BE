@@ -44,7 +44,7 @@ func (t *transactionRepository) GetAllTransaction(search string, page int, limit
 	query := t.db.Model(&model.Transaction{}).Preload("TransactionDetail").Preload("TransactionDetail.Product")
 
 	if search != "" {
-		query = query.Where("id LIKE ? or user_id LIKE ?", "%"+search+"%", "%"+search+"%")
+		query = query.Where("id LIKE ? or user_id LIKE ? or status LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
 	}
 
 	var totalCount int64
@@ -99,7 +99,7 @@ func (t *transactionRepository) GetAllTransactionByUserId(userId string, search 
 	query := t.db.Model(&model.Transaction{}).Preload("TransactionDetail").Preload("TransactionDetail.Product").Where("user_id = ?", userId)
 
 	if search != "" {
-		query = query.Where("id LIKE ? or user_id LIKE ?", "%"+search+"%", "%"+search+"%")
+		query = query.Where("id LIKE ? or user_id LIKE ? or status LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
 	}
 
 	var totalCount int64
