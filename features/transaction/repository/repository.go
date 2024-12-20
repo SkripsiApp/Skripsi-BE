@@ -122,10 +122,14 @@ func (t *transactionRepository) GetAllTransactionByUserId(userId string, search 
 }
 
 // UpdateNoResiTransactionById implements interfaces.TransactionRepositoryInterface.
-func (t *transactionRepository) UpdateNoReceiptTransactionById(id, resi string) error {
+func (t *transactionRepository) UpdateNoReceiptTransactionById(id, resi, status string) error {
 	data := model.Transaction{}
 
-	tx := t.db.Model(&data).Where("id = ?", id).Update("no_receipt", resi)
+	tx := t.db.Model(&data).Where("id = ?", id).Updates(map[string]interface{}{
+		"no_receipt": resi,
+		"status":     status,
+	})
+	
 	if tx.Error != nil {
 		return tx.Error
 	}

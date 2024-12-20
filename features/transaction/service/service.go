@@ -164,6 +164,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	// updatedPoint += data.TotalPoint
 
 	data.Status = "Belum Dibayar"
+	data.NoTransaction = helper.GenerateRandomTransaction()
 	transaction, err := t.transactionRepository.CreateTransaction(data)
 	if err != nil {
 		return entity.TransactionCore{}, "", err
@@ -394,9 +395,9 @@ func (t *transactionService) UpdateNoReceiptTransactionById(id string, resi stri
 		return helper.ResponseError(400, "status transaksi harus dibayar")
 	}
 
-	transaction.Status = "Dikirim"
+	status := "Dikirim"
 
-	err = t.transactionRepository.UpdateNoReceiptTransactionById(id, resi)
+	err = t.transactionRepository.UpdateNoReceiptTransactionById(id, resi, status)
 	if err != nil {
 		return err
 	}
