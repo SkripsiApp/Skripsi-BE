@@ -22,7 +22,7 @@ func SendEmailPayment(emailAddress string, customerName string, paymentURL strin
 		emailContent = strings.Replace(emailContent, "{{.PaymentURL}}", paymentURL, -1)
 
 		// Kirim email konfirmasi pembayaran
-		_, errEmail := SendEmailSMTPForOTP([]string{emailAddress}, emailContent, customerName)
+		_, errEmail := SendEmailSMTPForPayment([]string{emailAddress}, emailContent, customerName)
 		if errEmail != nil {
 			log.Printf("gagal mengirim email konfirmasi pembayaran: %v", errEmail)
 		}
