@@ -11,6 +11,7 @@ import (
 	userCore "skripsi/features/user/entity"
 	user "skripsi/features/user/interfaces"
 	voucher "skripsi/features/voucher/interfaces"
+	"skripsi/utils/email"
 	"skripsi/utils/helper"
 	"skripsi/utils/pagination"
 
@@ -197,6 +198,8 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	}
 
 	snapRedirectURL := snapResp.RedirectURL
+
+	email.SendEmailPayment(user.Email, user.Name, snapRedirectURL)
 
 	fmt.Println("Updating User Points:", updatedPoint)
 	if err := t.userRepository.UpdatedPoint(user.Id, updatedPoint); err != nil {
