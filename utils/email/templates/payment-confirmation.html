@@ -61,6 +61,14 @@
         .btn:active {
             background-color: #1d7fbb;
         }
+
+        a {
+            color: white !important;
+            text-decoration: none;
+        }
+        a:hover {
+            color: white !important;
+        }
     </style>
 </head>
 <body>
@@ -70,7 +78,7 @@
         </div>
         <div class="email-body">
             <p>Yth. {{.CustomerName}},</p>
-            <p>Terima kasih telah melakukan transaksi di Toko Alni Accessories. Jika Anda belum melakukan pembayaran, silakan klik tombol di bawah ini untuk menyelesaikan pembayaran Anda.</p>
+            <p>Terima kasih telah melakukan transaksi di Toko Alni Accessories. Jika Anda belum melakukan pembayaran melalui aplikasi, silakan klik tombol di bawah ini untuk menyelesaikan pembayaran Anda.</p>
             <p>
                 <a href="{{.PaymentURL}}" class="btn">Selesaikan Pembayaran</a>
             </p>

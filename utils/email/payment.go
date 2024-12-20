@@ -9,7 +9,7 @@ import (
 func SendEmailPayment(emailAddress string, customerName string, paymentURL string) {
 	go func() {
 		// Buka file template email untuk konfirmasi pembayaran.
-		filePath := "utils/email/templates/payment_confirmation.html"
+		filePath := "utils/email/templates/payment-confirmation.html"
 		file, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Printf("gagal membaca template email konfirmasi pembayaran: %v", err)
@@ -22,7 +22,12 @@ func SendEmailPayment(emailAddress string, customerName string, paymentURL strin
 		emailContent = strings.Replace(emailContent, "{{.PaymentURL}}", paymentURL, -1)
 
 		// Kirim email konfirmasi pembayaran
-		_, errEmail := SendEmailSMTPForPayment([]string{emailAddress}, emailContent, customerName)
+		data := map[string]string{
+			"CustomerName": customerName,
+			"PaymentURL":   paymentURL,
+		}
+
+		_, errEmail := SendEmailSMTPForPayment([]string{emailAddress}, emailContent, data)
 		if errEmail != nil {
 			log.Printf("gagal mengirim email konfirmasi pembayaran: %v", errEmail)
 		}

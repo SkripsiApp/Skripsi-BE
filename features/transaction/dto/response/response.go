@@ -13,6 +13,7 @@ type TransactionResponse struct {
 	TotalPoint         int                         `json:"total_point"`
 	UsePoint           bool                        `json:"use_point"`
 	PointUsed          int                         `json:"point_used"`
+	VoucherDiscount    int                         `json:"voucher_discount"`
 	DiscountAmount     int                         `json:"discount_amount"`
 	CourierName        string                      `json:"courier_name"`
 	ShippingCost       int                         `json:"shipping_cost"`
