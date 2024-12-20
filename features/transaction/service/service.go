@@ -46,14 +46,14 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		return entity.TransactionCore{}, "", helper.ResponseError(400, "user id tidak boleh kosong")
 	}
 
-	var discountAmount int
+	var voucherDiscount int
 	if data.VoucherId != nil {
 		voucher, err := t.voucherRepository.GetById(*data.VoucherId)
 		if err != nil {
 			return entity.TransactionCore{}, "", helper.ResponseError(400, "voucher tidak ditemukan")
 		}
 
-		discountAmount += voucher.Discount
+		voucherDiscount += voucher.Discount
 		fmt.Println("Voucher Discount:", data.DiscountAmount)
 	}
 
@@ -116,6 +116,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 
 	fmt.Printf("User's current points before transaction: %d\n", user.Point)
 
+	discountAmount := voucherDiscount
 	if data.UsePoint && data.PointUsed > 0 {
 		fmt.Printf("Attempting to use points - UsePoint: %v, PointUsed: %d\n", data.UsePoint, data.PointUsed)
 		if user.Point < data.PointUsed {
@@ -156,6 +157,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 	totalPrice += data.ShippingCost
 	data.OriginalPrice = originalPrice
 	data.TotalPrice = totalPrice
+	data.VoucherDiscount = voucherDiscount
 	data.DiscountAmount = discountAmount
 	data.TotalPoint = totalPrice / 100
 
