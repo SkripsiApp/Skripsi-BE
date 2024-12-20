@@ -25,6 +25,12 @@ type TransactionResponse struct {
 	TransactionDetails []TransactionDetailResponse `json:"transaction_details"`
 }
 
+type TransactionRequestResponse struct {
+	Id                 string                      `json:"id"`
+	NoTransaction	  string                      `json:"no_transaction"`
+	PaymentURL         string                      `json:"payment_url"`
+}
+
 type TransactionDetailResponse struct {
 	Id          string `json:"id"`
 	ProductId   string `json:"product_id"`
