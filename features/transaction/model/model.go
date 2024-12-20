@@ -18,6 +18,7 @@ type Transaction struct {
 	TotalPoint        int
 	UsePoint          bool
 	PointUsed         int
+	VoucherDiscount   int
 	DiscountAmount    int
 	CourierName       string
 	ShippingCost      int

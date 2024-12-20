@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfirmasi Pembayaran</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 650px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .email-header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .email-header h1 {
+            color: #3ABEF9;
+            font-size: 28px;
+            margin: 0;
+        }
+        .email-body {
+            margin: 20px 0;
+        }
+        .email-body p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333333;
+            margin-bottom: 15px;
+        }
+        .email-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #888888;
+            font-size: 12px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            font-size: 18px;
+            color: #ffffff;
+            background-color: #3ABEF9;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #2a93d5;
+        }
+        .btn:active {
+            background-color: #1d7fbb;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Konfirmasi Pembayaran</h1>
+        </div>
+        <div class="email-body">
+            <p>Yth. {{.CustomerName}},</p>
+            <p>Terima kasih telah melakukan transaksi di Toko Alni Accessories. Jika Anda belum melakukan pembayaran, silakan klik tombol di bawah ini untuk menyelesaikan pembayaran Anda.</p>
+            <p>
+                <a href="{{.PaymentURL}}" class="btn">Selesaikan Pembayaran</a>
+            </p>
+            <p>Jika Anda memiliki pertanyaan, kami siap membantu Anda kapan saja.</p>
+            <p>Salam hangat,<br>Toko Alni Accessories</p>
+        </div>
+        <div class="email-footer">
+            <p>Email ini dikirim secara otomatis, mohon untuk tidak membalas pesan ini.</p>
+        </div>
+    </div>
+</body>
+</html>
