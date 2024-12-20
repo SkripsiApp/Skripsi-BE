@@ -7,7 +7,8 @@ import (
 )
 
 func GenerateRandomTransaction() string {
-	timestamp := time.Now().UnixNano()
-	randomPart := rand.Int63()
+	// Ambil 6 digit terakhir dari timestamp untuk mendapatkan nilai yang lebih pendek
+	timestamp := time.Now().Unix() % 1000000
+	randomPart := rand.Int63() % 1000000
 	return fmt.Sprintf("TXN-%d-%d", timestamp, randomPart)
 }
