@@ -34,7 +34,7 @@ func SendEmailSMTPForOTP(to []string, template string, data interface{}) (bool, 
 	return true, nil
 }
 
-func SendEmailSMTPForPayment(to []string, template string, data interface{}) (bool, error) {
+func SendEmailSMTPForPayment(to []string, template string, data map[string]string) (bool, error) {
 	emailHost := os.Getenv("EMAIL_HOST")
 	emailFrom := os.Getenv("EMAIL_FROM")
 	emailPassword := os.Getenv("EMAIL_PASSWORD")
@@ -46,8 +46,8 @@ func SendEmailSMTPForPayment(to []string, template string, data interface{}) (bo
 	m.SetHeader("To", to...)
 	m.SetHeader("Subject", "Konfirmasi Pembayaran")
 
-	emailContent := strings.Replace(template, "{{.CustomerName}}", data.(map[string]string)["CustomerName"], -1)
-	emailContent = strings.Replace(emailContent, "{{.PaymentURL}}", data.(map[string]string)["PaymentURL"], -1)
+	emailContent := strings.Replace(template, "{{.CustomerName}}", data["CustomerName"], -1)
+	emailContent = strings.Replace(emailContent, "{{.PaymentURL}}", data["PaymentURL"], -1)
 
 	// Set HTML body
 	m.SetBody("text/html", emailContent)
