@@ -41,12 +41,14 @@ func (t *transactionController) CreateTransaction(e echo.Context) error {
 	data := request.TransactionRequestToTransactionCore(input)
 	data.UserId = id
 
-	_, _, err := t.transactionService.CreateTransaction(data)
+	transaction, snap, err := t.transactionService.CreateTransaction(data)
 	if err != nil {
 		return err
 	}
 
-	return e.JSON(200, helper.ResponseSuccess("transaksi berhasil dibuat"))
+	response := response.TransactionCoreToTransactionRequestResponse(transaction, snap)
+
+	return e.JSON(200, helper.ResponseSuccessWithData("transaksi berhasil dibuat", response))
 }
 
 func (t *transactionController) HandleMidtransNotification(e echo.Context) error {
