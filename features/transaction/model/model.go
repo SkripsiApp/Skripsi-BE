@@ -12,6 +12,7 @@ type Transaction struct {
 	UserId            string  `gorm:"type:varchar(191);not null"`
 	VoucherId         *string `gorm:"type:varchar(191);null"`
 	AddressId         string  `gorm:"type:varchar(191);not null"`
+	NoTransaction     string  `gorm:"type:varchar(191);not null;unique"`
 	OriginalPrice     int
 	TotalPrice        int
 	TotalPoint        int
