@@ -12,6 +12,7 @@ type AddressCore struct {
 	Name       string
 	Address    string
 	City       string
+	CityId     string
 	Subdistric string
 	ZipCode    string
 	Phone      string

@@ -8,6 +8,7 @@ func AddressCoreToAddressResponse(data entity.AddressCore) AddressResponse {
 		Name:       data.Name,
 		Address:    data.Address,
 		City:       data.City,
+		CityId:     data.CityId,
 		Subdistric: data.Subdistric,
 		ZipCode:    data.ZipCode,
 		Phone:      data.Phone,

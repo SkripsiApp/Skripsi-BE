@@ -13,12 +13,13 @@ func AddressCoreToAddressModel(data entity.AddressCore) model.Address {
 		Name:       data.Name,
 		Address:    data.Address,
 		City:       data.City,
+		CityId:     data.CityId,
 		Subdistric: data.Subdistric,
 		ZipCode:    data.ZipCode,
 		Phone:      data.Phone,
 		CreatedAt:  data.CreatedAt,
 		UpdatedAt:  data.UpdatedAt,
-		DeletedAt:   data.DeletedAt,
+		DeletedAt:  data.DeletedAt,
 	}
 	return addressModel
 }
@@ -40,12 +41,13 @@ func AddressModelToAddressCore(data model.Address) entity.AddressCore {
 		Name:       data.Name,
 		Address:    data.Address,
 		City:       data.City,
+		CityId:     data.CityId,
 		Subdistric: data.Subdistric,
 		ZipCode:    data.ZipCode,
 		Phone:      data.Phone,
 		CreatedAt:  data.CreatedAt,
 		UpdatedAt:  data.UpdatedAt,
-		DeletedAt:   data.DeletedAt,
+		DeletedAt:  data.DeletedAt,
 	}
 	return addressCore
 }
