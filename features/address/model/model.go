@@ -12,6 +12,7 @@ type Address struct {
 	Name       string `gorm:"not null"`
 	Address    string `gorm:"not null"`
 	City       string `gorm:"not null"`
+	CityId     string `gorm:"not null"`
 	Subdistric string `gorm:"not null"`
 	ZipCode    string `gorm:"not null"`
 	Phone      string `gorm:"not null"`

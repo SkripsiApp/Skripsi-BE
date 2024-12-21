@@ -25,6 +25,7 @@ env:
   EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
   EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
   EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+  RAJAONGKIR_API_KEY: ${{ secrets.RAJAONGKIR_API_KEY }}
 
 jobs:
   deploy:
@@ -80,6 +81,7 @@ jobs:
             EMAIL_PORT=${{ env.EMAIL_PORT }}
             EMAIL_FROM=${{ env.EMAIL_FROM }}
             EMAIL_PASSWORD=${{ env.EMAIL_PASSWORD }}
+            RAJAONGKIR_API_KEY=${{ env.RAJAONGKIR_API_KEY }}
   
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

@@ -38,6 +38,13 @@ func (a *addressService) Create(data entity.AddressCore) (entity.AddressCore, er
 		return entity.AddressCore{}, helper.ResponseError(400, "format kode pos tidak valid")
 	}
 
+	cityId, err := helper.GetCityID(data.City)
+	if err != nil {
+		return entity.AddressCore{}, err
+	}
+
+	data.CityId = cityId
+
 	response, err := a.addressRepository.Create(data)
 	if err != nil {
 		return entity.AddressCore{}, err
