@@ -3,7 +3,9 @@ package controller
 import (
 	"net/http"
 	"skripsi/features/chatbot/dto/request"
+	"skripsi/features/chatbot/dto/response"
 	"skripsi/features/chatbot/interfaces"
+	"skripsi/utils/helper"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,22 +23,22 @@ func NewChatbotController(chatbotService interfaces.ChatbotServiceInterface) *ch
 func (c *chatbotController) HandleQuery(e echo.Context) error {
 	var req request.ChatbotRequest
 	if err := e.Bind(&req); err != nil {
-		return e.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+		return helper.ResponseError(400, "Invalid input data")
 	}
 
 	if req.Question == "" {
-		return e.JSON(http.StatusBadRequest, map[string]string{"error": "Question is required"})
+		return helper.ResponseError(400, "Pertanyaan tidak boleh kosong")
 	}
 
 	answer, imageURLs, err := c.chatbotService.HandleCustomerQuery(req.Question)
 	if err != nil {
-		return e.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return helper.ResponseError(500, err.Error())
 	}
 
-	response := map[string]interface{}{
-		"answer": answer,
-		"images": imageURLs,
+	response := response.ChatbotResponse{
+		Answer: answer,
+		Images: imageURLs,
 	}
 
-	return e.JSON(http.StatusOK, response)
+	return e.JSON(http.StatusOK, helper.ResponseSuccessWithData("berhasil mendapatkan response", response))
 }
