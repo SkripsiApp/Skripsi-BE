@@ -26,6 +26,7 @@ env:
   EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
   EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
   RAJAONGKIR_API_KEY: ${{ secrets.RAJAONGKIR_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
 jobs:
   deploy:
@@ -82,6 +83,7 @@ jobs:
             EMAIL_FROM=${{ env.EMAIL_FROM }}
             EMAIL_PASSWORD=${{ env.EMAIL_PASSWORD }}
             RAJAONGKIR_API_KEY=${{ env.RAJAONGKIR_API_KEY }}
+            OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}
   
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
