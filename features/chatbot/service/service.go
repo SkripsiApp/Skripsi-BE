@@ -40,14 +40,17 @@ func (uc *ChatbotUseCase) HandleCustomerQuery(query string) (string, []string, e
 		}
 	}
 
-	complaintKeywords := []string{"komplain", "masalah", "bantuan", "error", "keluhan"}
+	complaintKeywords := []string{"komplain", "masalah", "bantuan", "error", "keluhan", "mengadu", "mengeluh", "mengadukan", "mengeluhkan", "cacat", "rusak", "retur", "refund", "pengembalian", "pengembalian dana", "pengembalian produk", "penggantian", "penggantian produk", "penggantian barang", "penggantian dana", "penggantian order", "penggantian pesanan", "penggantian item", "penggantian produk", "penggantian pesanan"}
 	for _, keyword := range complaintKeywords {
 		if strings.Contains(query, keyword) {
 			whatsappNumber := "6282189638011"
 			whatsappLink := fmt.Sprintf("https://wa.me/%s", whatsappNumber)
 			response := fmt.Sprintf(
-				"Halo, saya Tia. Terima kasih telah menghubungi kami. Kami sangat menghargai kesabaran Anda dalam menghadapi situasi ini. "+
-					"Untuk bantuan lebih lanjut, Anda dapat langsung menghubungi admin kami melalui WhatsApp di nomor %s, atau klik tautan berikut: %s. "+
+				"Kami sangat menghargai kesabaran Anda dalam menghadapi situasi ini.\n\n"+
+					"Untuk bantuan lebih lanjut:\n"+
+					"1. Anda dapat langsung menghubungi admin kami melalui WhatsApp di nomor berikut: %s.\n"+
+					"2. Copy tautan berikut untuk membuka WhatsApp: %s.\n"+
+					"3. Atau klik tombol di bawah untuk langsung menghubungi kami melalui WhatsApp.\n\n"+
 					"Admin kami akan dengan senang hati membantu menyelesaikan permasalahan Anda.",
 				whatsappNumber, whatsappLink,
 			)
