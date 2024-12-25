@@ -40,7 +40,7 @@ func (a *addressService) Create(data entity.AddressCore) (entity.AddressCore, er
 
 	cityId, err := helper.GetCityID(data.City)
 	if err != nil {
-		return entity.AddressCore{}, err
+		return entity.AddressCore{}, helper.ResponseError(400, "kota tidak ditemukan")
 	}
 
 	data.CityId = cityId
