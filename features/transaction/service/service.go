@@ -166,7 +166,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 
 	// updatedPoint += data.TotalPoint
 
-	data.Status = "Belum Dibayar"
+	data.Status = "Pending"
 	data.NoTransaction = helper.GenerateRandomTransaction()
 	transaction, err := t.transactionRepository.CreateTransaction(data)
 	if err != nil {
