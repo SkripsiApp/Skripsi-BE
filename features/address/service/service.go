@@ -125,6 +125,13 @@ func (a *addressService) UpdateById(id string, userId string, data entity.Addres
 		return helper.ResponseError(400, "format kode pos tidak valid")
 	}
 
+	cityId, err := helper.GetCityID(data.City)
+	if err != nil {
+		return helper.ResponseError(400, "kota tidak ditemukan")
+	}
+
+	data.CityId = cityId
+
 	address, err := a.addressRepository.FindById(id)
 	if err != nil {
 		return helper.ResponseError(400, constant.ERROR_DATA_ID)
