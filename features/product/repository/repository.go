@@ -81,6 +81,37 @@ func (p *productRepository) GetAll(search string, page int, limit int) ([]entity
 	return response, pageInfo, int(totalCount), nil
 }
 
+// GetAllByTopSold implements interfaces.ProductRepositoryInterface.
+func (p *productRepository) GetAllByTopSold(search string, page int, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error) {
+	data := []model.Product{}
+
+	offset := (page - 1) * limit
+	query := p.db.Model(&model.Product{}).Preload("ProductSize").Order("sold desc")
+
+	if search != "" {
+		query = query.Where("name LIKE ? or category LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	var totalCount int64
+	tx := query.Count(&totalCount).Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	query = query.Offset(offset).Limit(limit)
+
+	tx = query.Find(&data)
+	if tx.Error != nil {
+		return nil, pagination.PageInfo{}, 0, tx.Error
+	}
+
+	response := mapping.ListProductModelToProductCore(data)
+
+	pageInfo := pagination.CalculateData(int(totalCount), limit, page)
+	return response, pageInfo, int(totalCount), nil
+}
+
+
 // GetById implements interfaces.ProductRepositoryInterface.
 func (p *productRepository) GetById(id string) (entity.ProductCore, error) {
 	data := model.Product{}

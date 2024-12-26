@@ -71,7 +71,7 @@ func (p *productService) Create(image *multipart.FileHeader, data entity.Product
 	if err != nil {
 		return entity.ProductCore{}, helper.ResponseError(500, "gagal upload gambar")
 	}
-	
+
 	data.Image = imageURL
 
 	response, err := p.productRepository.Create(data)
@@ -105,6 +105,22 @@ func (p *productService) GetAll(search string, page int, limit int) ([]entity.Pr
 	page, limit = helper.ValidateCountLimitAndPage(page, limit)
 
 	dataProduct, pageInfo, totalCount, err := p.productRepository.GetAll(search, page, limit)
+	if err != nil {
+		return nil, pagination.PageInfo{}, 0, err
+	}
+
+	return dataProduct, pageInfo, totalCount, nil
+}
+
+// GetAllByTopSold implements interfaces.ProductServiceInterface.
+func (p *productService) GetAllByTopSold(search string, page int, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error) {
+	if limit > 10 {
+		return nil, pagination.PageInfo{}, 0, helper.ResponseError(400, "limit tidak boleh lebih dari 10")
+	}
+
+	page, limit = helper.ValidateCountLimitAndPage(page, limit)
+
+	dataProduct, pageInfo, totalCount, err := p.productRepository.GetAllByTopSold(search, page, limit)
 	if err != nil {
 		return nil, pagination.PageInfo{}, 0, err
 	}
@@ -182,7 +198,7 @@ func (p *productService) UpdateById(id string, image *multipart.FileHeader, data
 		if err != nil {
 			return helper.ResponseError(500, "gagal upload gambar")
 		}
-		
+
 		log.Println("imageURL", imageURL)
 		existingProduct.Image = imageURL
 	}
