@@ -38,8 +38,10 @@ func (c *chatbotController) HandleQuery(e echo.Context) error {
 	var recommendations []response.Recommendation
 	for _, rec := range data {
 		recommendations = append(recommendations, response.Recommendation{
+			Id:    rec.Id,
 			Name:  rec.Name,
 			Price: rec.Price,
+			Sold:  rec.Sold,
 			Image: rec.Image,
 		})
 	}

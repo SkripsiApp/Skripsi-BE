@@ -149,8 +149,10 @@ func (uc *ChatbotUseCase) getProductInfo(keywords []string) (string, []entity.Pr
 				if product.Image != "" && !uc.imageURLs[product.Image] {
 					uc.imageURLs[product.Image] = true
 					recommendations = append(recommendations, entity.ProductRecommendation{
+						Id:    product.Id,
 						Name:  product.Name,
 						Price: product.Price,
+						Sold:  product.Sold,
 						Image: product.Image,
 					})
 				}
