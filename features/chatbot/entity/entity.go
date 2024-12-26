@@ -12,3 +12,9 @@ type ChatRequest struct {
 	Messages []openai.ChatCompletionMessage
 	Model    string
 }
+
+type ProductRecommendation struct {
+	Name  string
+	Price int
+	Image string
+}

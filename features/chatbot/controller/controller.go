@@ -30,14 +30,23 @@ func (c *chatbotController) HandleQuery(e echo.Context) error {
 		return helper.ResponseError(400, "Pertanyaan tidak boleh kosong")
 	}
 
-	answer, imageURLs, err := c.chatbotService.HandleCustomerQuery(req.Question)
+	answer, data, err := c.chatbotService.HandleCustomerQuery(req.Question)
 	if err != nil {
 		return helper.ResponseError(500, err.Error())
 	}
 
+	var recommendations []response.Recommendation
+	for _, rec := range data {
+		recommendations = append(recommendations, response.Recommendation{
+			Name:  rec.Name,
+			Price: rec.Price,
+			Image: rec.Image,
+		})
+	}
+
 	response := response.ChatbotResponse{
-		Answer: answer,
-		Images: imageURLs,
+		Answer:         answer,
+		Recommendation: recommendations,
 	}
 
 	return e.JSON(http.StatusOK, helper.ResponseSuccessWithData("berhasil mendapatkan response", response))

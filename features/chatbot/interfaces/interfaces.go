@@ -7,6 +7,6 @@ import (
 )
 
 type ChatbotServiceInterface interface {
-	HandleCustomerQuery(query string) (string, []string, error)
+	HandleCustomerQuery(query string) (string, []entity.ProductRecommendation, error)
 	GetCompletionFromMessages(request entity.ChatRequest) (openai.ChatCompletionResponse, error)
 }

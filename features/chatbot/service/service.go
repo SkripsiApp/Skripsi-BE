@@ -16,6 +16,7 @@ type ChatbotUseCase struct {
 	openAIKey    string
 	productRepo  product.ProductRepositoryInterface
 	faqResponses map[string]string
+	imageURLs    map[string]bool
 }
 
 func NewChatbotService(openAIKey string, productRepo product.ProductRepositoryInterface) interfaces.ChatbotServiceInterface {
@@ -27,10 +28,11 @@ func NewChatbotService(openAIKey string, productRepo product.ProductRepositoryIn
 			"sehari-hari": "Tentu, aksesoris titanium kami dirancang untuk penggunaan sehari-hari. Titanium sangat tahan lama dan nyaman dipakai dalam jangka waktu yang lama.",
 			"alergi":      "Titanium adalah logam yang sangat hipoalergenik, artinya sangat kecil kemungkinan menimbulkan reaksi alergi. Namun, jika Anda memiliki alergi logam yang parah, sebaiknya konsultasikan dengan dokter sebelum menggunakan.",
 		},
+		imageURLs: make(map[string]bool),
 	}
 }
 
-func (uc *ChatbotUseCase) HandleCustomerQuery(query string) (string, []string, error) {
+func (uc *ChatbotUseCase) HandleCustomerQuery(query string) (string, []entity.ProductRecommendation, error) {
 	query = strings.ToLower(query)
 
 	// Cek apakah query ada di FAQ atau mengandung kata kunci FAQ
@@ -58,41 +60,21 @@ func (uc *ChatbotUseCase) HandleCustomerQuery(query string) (string, []string, e
 		}
 	}
 
-	keywords := []string{"cincin", "kalung", "gelang", "aksesoris", "anting"}
-	var matchedKeyword string
+	keywords := []string{"cincin", "kalung", "gelang", "aksesoris", "anting", "liontin"}
+	matchedKeywords := []string{}
 	for _, keyword := range keywords {
 		if strings.Contains(strings.ToLower(query), keyword) {
-			matchedKeyword = keyword
-			break
+			matchedKeywords = append(matchedKeywords, keyword)
 		}
 	}
 
-	var productInfo string
-	var imageURLs []string
-	if matchedKeyword != "" {
-		titleCaseKeyword := helper.ToTitleCase(matchedKeyword)
-		products, _, _, err := uc.productRepo.GetAll(titleCaseKeyword, 1, 5)
-		if err != nil {
-			return "", nil, fmt.Errorf("error searching products: %v", err)
-		}
+	uc.imageURLs = make(map[string]bool)
+	var allRecommendations []entity.ProductRecommendation
 
-		if len(products) > 0 {
-			productInfo = "Berikut informasi produk yang mungkin Anda cari:\n"
-			for _, product := range products {
-				productInfo += fmt.Sprintf("- %s: %s, Harga: Rp%d\n", product.Name, product.Description, product.Price)
-				if product.Image != "" {
-					imageURLs = append(imageURLs, product.Image)
-				}
-			}
-		} else {
-			product, err := uc.productRepo.FindByName(titleCaseKeyword)
-			if err == nil {
-				productInfo = fmt.Sprintf("Produk yang Anda cari: %s: %s, Harga: Rp%d\n", product.Name, product.Description, product.Price)
-				if product.Image != "" {
-					imageURLs = append(imageURLs, product.Image)
-				}
-			}
-		}
+	var productInfo string
+	if len(matchedKeywords) > 0 {
+		_, recommendations := uc.getProductInfo(matchedKeywords)
+		allRecommendations = append(allRecommendations, recommendations...)
 	}
 
 	ctx := context.Background()
@@ -134,23 +116,48 @@ func (uc *ChatbotUseCase) HandleCustomerQuery(query string) (string, []string, e
 
 	answer := resp.Choices[0].Message.Content
 
+	mentionedKeywords := []string{}
 	for _, keyword := range keywords {
 		if strings.Contains(strings.ToLower(answer), keyword) {
-			products, _, _, err := uc.productRepo.GetAll(helper.ToTitleCase(keyword), 1, 5)
-			if err == nil && len(products) > 0 {
-				answer += "\n\nRekomendasi produk terkait:\n"
-				for _, product := range products {
-					answer += fmt.Sprintf("- %s: %s, Harga: Rp%d\n", product.Name, product.Description, product.Price)
-					if product.Image != "" {
-						imageURLs = append(imageURLs, product.Image)
-					}
-				}
-			}
-			break
+			mentionedKeywords = append(mentionedKeywords, keyword)
 		}
 	}
 
-	return answer, imageURLs, nil
+	if len(mentionedKeywords) > 0 {
+		_, additionalRecommendations := uc.getProductInfo(mentionedKeywords)
+		if len(additionalRecommendations) > 0 {
+			allRecommendations = append(allRecommendations, additionalRecommendations...)
+		}
+	}
+
+	return answer, allRecommendations, nil
+}
+
+func (uc *ChatbotUseCase) getProductInfo(keywords []string) (string, []entity.ProductRecommendation) {
+	var productInfo string
+	var recommendations []entity.ProductRecommendation
+	for _, keyword := range keywords {
+		titleCaseKeyword := helper.ToTitleCase(keyword)
+		products, _, _, err := uc.productRepo.GetAll(titleCaseKeyword, 1, 2) // Limit to 2 products per category
+		if err != nil {
+			continue
+		}
+		if len(products) > 0 {
+			productInfo += fmt.Sprintf("Produk %s:\n", titleCaseKeyword)
+			for _, product := range products {
+				productInfo += fmt.Sprintf("- %s, Harga: Rp%d\n", product.Name, product.Price)
+				if product.Image != "" && !uc.imageURLs[product.Image] {
+					uc.imageURLs[product.Image] = true
+					recommendations = append(recommendations, entity.ProductRecommendation{
+						Name:  product.Name,
+						Price: product.Price,
+						Image: product.Image,
+					})
+				}
+			}
+		}
+	}
+	return productInfo, recommendations
 }
 
 func (uc *ChatbotUseCase) GetCompletionFromMessages(request entity.ChatRequest) (openai.ChatCompletionResponse, error) {
