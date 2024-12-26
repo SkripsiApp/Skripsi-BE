@@ -21,4 +21,5 @@ func RouteProduct(e *echo.Group, db *gorm.DB) {
 	product.GET("/:id", productController.GetById)
 	product.PUT("/:id", productController.UpdateById, jwt.JWTMiddleware())
 	product.DELETE("/:id", productController.DeleteById, jwt.JWTMiddleware())
+	product.GET("/top-sold", productController.GetAllByTopSold)
 }

@@ -108,6 +108,25 @@ func (p *productController) GetAll(e echo.Context) error {
 	return e.JSON(200, helper.ResponseSuccessWithPagnationAndCount(constant.SUCCESS_GET_DATA, response, pageInfo, totalCount))
 }
 
+func (p *productController) GetAllByTopSold(e echo.Context) error {
+	search := e.QueryParam("search")
+	page, _ := strconv.Atoi(e.QueryParam("page"))
+	limit, _ := strconv.Atoi(e.QueryParam("limit"))
+
+	data, pageInfo, totalCount, err := p.productService.GetAllByTopSold(search, page, limit)
+	if err != nil {
+		return err
+	}
+
+	if len(data) == 0 {
+		return helper.ResponseError(200, "data belum tersedia")
+	}
+
+	response := response.ListProductCoreToListProductResponse(data)
+
+	return e.JSON(200, helper.ResponseSuccessWithPagnationAndCount(constant.SUCCESS_GET_DATA, response, pageInfo, totalCount))
+}
+
 func (p *productController) GetById(e echo.Context) error {
 	id := e.Param("id")
 

@@ -9,6 +9,7 @@ import (
 type ProductRepositoryInterface interface {
 	Create(data entity.ProductCore) (entity.ProductCore, error)
 	GetAll(search string, page, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error)
+	GetAllByTopSold(search string, page int, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error)
 	GetById(id string) (entity.ProductCore, error)
 	UpdateById(id string, data entity.ProductCore) error
 	DeleteById(id string) error
@@ -24,6 +25,7 @@ type ProductRepositoryInterface interface {
 type ProductServiceInterface interface {
 	Create(image *multipart.FileHeader, data entity.ProductCore) (entity.ProductCore, error)
 	GetAll(search string, page, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error)
+	GetAllByTopSold(search string, page int, limit int) ([]entity.ProductCore, pagination.PageInfo, int, error)
 	GetById(id string) (entity.ProductCore, error)
 	UpdateById(id string, image *multipart.FileHeader, data entity.ProductCore) error
 	DeleteById(id string) error
