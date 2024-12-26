@@ -6,7 +6,9 @@ type ChatbotResponse struct {
 }
 
 type Recommendation struct {
+	Id    string `json:"id"`
 	Name  string `json:"name"`
 	Price int    `json:"price"`
+	Sold  int    `json:"sold"`
 	Image string `json:"image"`
 }

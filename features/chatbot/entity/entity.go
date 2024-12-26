@@ -14,7 +14,9 @@ type ChatRequest struct {
 }
 
 type ProductRecommendation struct {
+	Id    string
 	Name  string
 	Price int
+	Sold  int
 	Image string
 }
