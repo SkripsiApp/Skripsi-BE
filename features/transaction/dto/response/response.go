@@ -7,6 +7,7 @@ type TransactionResponse struct {
 	UserId             string                      `json:"user_id"`
 	VoucherId          *string                     `json:"voucher_id"`
 	AddressId          string                      `json:"address_id"`
+	AddressName        string                      `json:"address_name"`
 	NoTransaction      string                      `json:"no_transaction"`
 	OriginalPrice      int                         `json:"original_price"`
 	TotalPrice         int                         `json:"total_price"`
