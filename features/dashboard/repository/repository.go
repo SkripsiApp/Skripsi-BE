@@ -133,7 +133,7 @@ func (d *dashboardRepository) CountTotalRevenue() (int, error) {
 	var totalRevenue int
 
 	err := d.db.Table("transactions").
-		Where("status = ?", "Paid").
+		Where("status = ?", "Dibayar").
 		Select("SUM(total_price)").
 		Scan(&totalRevenue).Error
 	if err != nil {
