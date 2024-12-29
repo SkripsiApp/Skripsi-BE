@@ -7,6 +7,7 @@ type TransactionCore struct {
 	UserId            string
 	VoucherId         *string
 	AddressId         string
+	AddressName       string
 	NoTransaction	 string
 	OriginalPrice     int
 	TotalPrice        int

@@ -8,6 +8,7 @@ func TransactionCoreToTransactionResponse(data entity.TransactionCore) Transacti
 		UserId:             data.UserId,
 		VoucherId:          data.VoucherId,
 		AddressId:          data.AddressId,
+		AddressName:        data.AddressName,
 		NoTransaction:      data.NoTransaction,
 		OriginalPrice:      data.OriginalPrice,
 		TotalPrice:         data.TotalPrice,

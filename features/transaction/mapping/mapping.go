@@ -47,6 +47,7 @@ func TransactionModelToTransactionCore(data model.Transaction) entity.Transactio
 		UserId:            data.UserId,
 		VoucherId:         data.VoucherId,
 		AddressId:         data.AddressId,
+		AddressName:       data.Address.Name,
 		NoTransaction:     data.NoTransaction,
 		OriginalPrice:     data.OriginalPrice,
 		TotalPrice:        data.TotalPrice,

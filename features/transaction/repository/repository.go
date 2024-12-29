@@ -41,7 +41,7 @@ func (t *transactionRepository) GetAllTransaction(search string, page int, limit
 	data := []model.Transaction{}
 
 	offset := (page - 1) * limit
-	query := t.db.Model(&model.Transaction{}).Preload("TransactionDetail").Preload("TransactionDetail.Product")
+	query := t.db.Model(&model.Transaction{}).Preload("TransactionDetail").Preload("TransactionDetail.Product").Preload("Address")
 
 	if search != "" {
 		query = query.Where("id LIKE ? or user_id LIKE ? or status LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
@@ -61,7 +61,6 @@ func (t *transactionRepository) GetAllTransaction(search string, page int, limit
 	}
 
 	response := mapping.ListTransactionModelToListTransactionCore(data)
-
 	pageInfo := pagination.CalculateData(int(totalCount), limit, page)
 	return response, pageInfo, int(totalCount), nil
 }
