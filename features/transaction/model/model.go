@@ -41,5 +41,5 @@ type TransactionDetail struct {
 	TotalPrice    int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	Product       product.Product `gorm:"foreignKey:ProductId;references:Id"`
+	Product       product.Product `gorm:"foreignKey:ProductId;references:Id;constraint:OnDelete:SET NULL"`
 }
