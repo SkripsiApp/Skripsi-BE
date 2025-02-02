@@ -31,6 +31,7 @@ func RouteTransaction(e *echo.Group, db *gorm.DB) {
 	transaction.PATCH("/:id", transactionController.UpdateNoReceipt, jwt.JWTMiddleware())
 	transaction.PATCH("/:id/status", transactionController.UpdateStatusTransactionUserById, jwt.JWTMiddleware())
 	transaction.POST("/midtrans/notification", transactionController.HandleMidtransNotification)
-
+	transaction.GET("/payment/redirect", transactionController.HandlePaymentRedirect)
 	transaction.GET("/profile", transactionController.GetAllTransactionByUserId, jwt.JWTMiddleware())
+
 }

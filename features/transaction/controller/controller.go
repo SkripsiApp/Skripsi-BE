@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"skripsi/features/transaction/dto/request"
 	"skripsi/features/transaction/dto/response"
 	"skripsi/features/transaction/interfaces"
@@ -116,7 +118,7 @@ func (t *transactionController) GetTransactionById(e echo.Context) error {
 	return e.JSON(200, helper.ResponseSuccessWithData(constant.SUCCESS_GET_DATA, response))
 }
 
-func (t *transactionController) GetAllTransactionByUserId (e echo.Context) error {
+func (t *transactionController) GetAllTransactionByUserId(e echo.Context) error {
 	id, _, errExtract := jwt.ExtractToken(e)
 	if errExtract != nil {
 		return errExtract
@@ -188,3 +190,26 @@ func (t *transactionController) UpdateStatusTransactionUserById(e echo.Context) 
 	return e.JSON(200, helper.ResponseSuccess("status transaksi berhasil diupdate"))
 }
 
+func (t *transactionController) HandlePaymentRedirect(e echo.Context) error {
+	orderId := e.QueryParam("order_id")
+	statusCode := e.QueryParam("status_code")
+	transactionStatus := e.QueryParam("transaction_status")
+
+	// Log untuk debugging
+	log.Printf("Received redirect - OrderID: %s, Status Code: %s, Transaction Status: %s",
+		orderId, statusCode, transactionStatus)
+
+	var htmlFile string
+	if statusCode == "200" && transactionStatus == "settlement" {
+		htmlFile = "utils/redirect/success-url-midtrans.html"
+	} else {
+		htmlFile = "utils/redirect/failed-url-midtrans.html"
+	}
+
+	content, err := os.ReadFile(htmlFile)
+	if err != nil {
+		return helper.ResponseError(500, "failed to read html file")
+	}
+
+	return e.HTML(200, string(content))
+}
