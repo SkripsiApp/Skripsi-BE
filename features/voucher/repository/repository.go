@@ -40,13 +40,13 @@ func (v *voucherRepository) Create(data entity.VoucherCore) (entity.VoucherCore,
 func (v *voucherRepository) DeleteById(id string) error {
 	data := model.Voucher{}
 
-	tx := v.db.Where("id = ?", id).Delete(&data)
-	if tx.Error != nil {
-		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-			return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
-		}
-		return tx.Error
-	}
+	tx := v.db.Unscoped().Where("id = ?", id).Delete(&data)
+    if tx.Error != nil {
+        if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+            return helper.ResponseError(404, constant.ERROR_DATA_NOT_FOUND)
+        }
+        return tx.Error
+    }
 
 	return nil
 }
