@@ -190,6 +190,9 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 			Secure: true,
 		},
 		Items: &itemDetails,
+		Callbacks: &snap.Callbacks{
+			Finish: os.Getenv("MIDTRANS_FINISH_URL"),
+		},
 	}
 
 	snapResp, err := midtransClient.CreateTransaction(req)
