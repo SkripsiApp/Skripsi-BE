@@ -191,7 +191,7 @@ func (t *transactionService) CreateTransaction(data entity.TransactionCore) (ent
 		},
 		Items: &itemDetails,
 		Callbacks: &snap.Callbacks{
-			Finish: os.Getenv("MIDTRANS_FINISH_URL"),
+			Finish: "https://skripsi-api-859835962101.asia-southeast2.run.app/transaction/payment/redirect",
 		},
 	}
 
