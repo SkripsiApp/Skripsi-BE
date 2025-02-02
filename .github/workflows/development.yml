@@ -21,6 +21,7 @@ env:
   API_NAME: ${{ secrets.API_NAME }}
   API_KEY: ${{ secrets.API_KEY }}
   MIDTRANS_SERVER_KEY: ${{ secrets.MIDTRANS_SERVER_KEY }}
+  MIDTRANS_FINISH_URL: ${{ secrets.MIDTRANS_FINISH_URL }}
   EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
   EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
   EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
@@ -78,6 +79,7 @@ jobs:
             API_NAME=${{ env.API_NAME }}
             API_KEY=${{ env.API_KEY }}
             MIDTRANS_SERVER_KEY=${{ env.MIDTRANS_SERVER_KEY }}
+            MIDTRANS_FINISH_URL=${{ env.MIDTRANS_FINISH_URL }}
             EMAIL_HOST=${{ env.EMAIL_HOST }}
             EMAIL_PORT=${{ env.EMAIL_PORT }}
             EMAIL_FROM=${{ env.EMAIL_FROM }}
